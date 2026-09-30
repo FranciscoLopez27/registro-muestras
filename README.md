@@ -30,10 +30,13 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 - Registro del analista encargado del análisis.
 - Registro de resultado por análisis de muestra.
 - Definición de fecha límite para reporte.
+- Busqueda de muestras por ID.
+- Despliegue de análisis y resultados de muestra.
+- Listado de muestras fuera de norma.
 
 ## Reglas
 - Una muestra se encuentra fuera de norma cuando el resultado es superior al límite indicado por el cliente (generalmente el del RSA).
-- Los resultados de análisis pueden ser Cualitativos o Cuantitativos.
+- Se consideran solo analisis Cuantitativos, es decir se ralizan conteos.
 - Una muestra puede estar en estado de enviada, confirmada por el laboratorio (entro a análisis) y liberada.
 - ID de cada muestra es único.
 - Los estados de las muestras solo pueden cambiar linealmente de enviada a confirmada a liberada.
@@ -43,5 +46,6 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 ## Fuera del alcance (por ahora)
 - Agrupación de muestras por análisis y por día de análisis
 - Ingreso de usuarios diferenciado por cargo.
-Generación de informe con los resultados para cliente
+- Generación de informe con los resultados para cliente
 - Generación de tiempo fin de reporte de forma automática en base a análisis.
+- Integrar análisis cualitativo para las muestras.
