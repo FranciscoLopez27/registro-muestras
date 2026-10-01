@@ -7,7 +7,8 @@ La información relacionada a las muestras que se procesan en un laboratorio a t
 Personal del equipo de microbiología encargado de registrar las muestras que son procesadas en su laboratorio.
 
 ## Datos de una muestra
-- Nombre y desccripcion de la muestra
+- Nombre muestra
+- Descripcion de la muestra
 - Numero de identificación de la muestra.
 - Estado de la muestra.
 - Cliente que solicita análisis para la muestra.
