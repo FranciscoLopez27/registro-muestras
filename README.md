@@ -43,6 +43,8 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 - ID de cada muestra es único.
 - Los estados de las muestras solo pueden cambiar linealmente de enviada a confirmada a liberada.
 - Las muestras liberadas no pueden ser modificadas.
+- La descripcion de todas las muestras no pueden estar en blanco
+- Limite de conteo deben ser mayor o igual a 0
 
 
 ## Fuera del alcance (por ahora)
@@ -51,3 +53,5 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 - Generación de informe con los resultados para cliente
 - Generación de tiempo fin de reporte de forma automática en base a análisis.
 - Integrar análisis cualitativo para las muestras.
+- Limite pueda dejarse no definirse por el cliente (nunca estara fuera de especificacion)
+- Casos de ID repetidos
