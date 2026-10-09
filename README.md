@@ -55,3 +55,13 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 - Integrar análisis cualitativo para las muestras.
 - Limite pueda dejarse no definirse por el cliente (nunca estara fuera de especificacion)
 - Casos de ID repetidos
+
+## Cómo usar
+
+Ejecutar el programa:
+
+    py registro.py
+
+Ejecutar las pruebas:
+
+    py test_registro.py

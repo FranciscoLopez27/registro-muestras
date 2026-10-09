@@ -90,12 +90,12 @@ def mostrar_menu():
     print("2. Listar muestras")
     print("3. Salir")
 
-def generar_datos_analisis():
+def generar_diccionario_analisis():
     """Solicita los datos al usuario y genera un diccionario con la información"""
     nombre_analisis = input("Ingrese nombre de análisis: \n")
     unidad_conteo = input("Ingrese la unidad del conteo ej: UFC/g ...\n")
     while True:
-        limite_conteo = input("Ingrese el limite de conteo para el análisis: \n")
+        limite_conteo = input("Ingrese el limite de conteo para el análisis: \n").strip()
         if limite_conteo.isdigit():
             limite_conteo = int(limite_conteo)
             break
@@ -111,12 +111,12 @@ def generar_datos_analisis():
 def pedir_analisis():
     """Pide al usuario uno o mas análisis y devuleve la lista de estos"""
     lista_analisis = []
-    datos_analisis = generar_datos_analisis()
+    datos_analisis = generar_diccionario_analisis()
     lista_analisis.append(datos_analisis)
     while True:
         opcion_usuario = input("¿Agregar otro análisis? (s/n)\n").strip().lower()
         if opcion_usuario == "s":
-            datos_analisis = generar_datos_analisis()
+            datos_analisis = generar_diccionario_analisis()
             lista_analisis.append(datos_analisis)
         elif opcion_usuario == "n":
             break
@@ -125,15 +125,39 @@ def pedir_analisis():
     return lista_analisis
 
 def pedir_datos_muestra():
-    datos_muestras = []
-
-    return datos_muestras
+    cliente_muestra = input("Ingresar codigo de cliente (cuatro digitos, anteponiendo 0):\n").strip()
+    descripcion_muestra = input("Ingresar descripción de la muestra:\n").strip()
+    analisis_muestra = pedir_analisis()
+    datos_muestra = {
+        "cliente": cliente_muestra,
+        "descripcion": descripcion_muestra,
+        "analisis": analisis_muestra
+    }
+    return datos_muestra
 
 def main():
-    listar_muestras = []
+    lista_muestras = []
     while True:
         mostrar_menu()
         opcion = input("Elige una opción: ").strip()
+        if opcion == "1":
+            id_nuevo, errores = agregar_muestra(lista_muestras,pedir_datos_muestra())
+            if errores:
+                print("La muestra no ha podido ser creada")
+                for error in errores:
+                    print(f"ERROR AL CREAR LA MUESTRA: {error}")
+                    
+            else:
+                print("Muestra agregada con exito")
+                print(f"ID de la muestra: {id_nuevo}")
+        elif opcion == "2":
+            listar_muestras(lista_muestras)
+        elif opcion == "3":
+            print("Adios...")
+            input("Presiones enter para continuar...")
+            break
+        else:
+            print("Opcion invalida, pruebe nuevamente")
 
 if __name__ == "__main__":
     main()
