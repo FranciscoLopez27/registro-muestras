@@ -1,6 +1,20 @@
 from datetime import date
 import copy
 
+#Catalogos
+
+CATALOGO_CLIENTES = {
+    "0042": {"nombre": "FrutasNorte S.A."},
+    "0044": {"nombre": "CarnesSur S.A."},
+    "0047": {"nombre": "VerdurasCentro S.A."},
+}
+
+CATALOGO_ANALISIS = {
+    "A012": {"nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2", "unidades": ["UFC/g", "UFC/ml"]},
+    "A013": {"nombre": "Conteo Coliformes", "norma": "ISO 4832", "unidades": ["UFC/ml"]},
+    "A019": {"nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2", "unidades": ["UFC/g", "UFC/ml"]},
+}
+
 #Codigo de unidades de conteo
 UNIDADES_VALIDAS = {"UFC/g", "UFC/ml", "UFC/swab", "NMP/g", "NMP/ml"}
 UNIDADES_VALIDAS_MINUSCULAS = {unidad.lower() for unidad in UNIDADES_VALIDAS}
@@ -134,6 +148,12 @@ def pedir_datos_muestra():
         "analisis": analisis_muestra
     }
     return datos_muestra
+
+def normalizar_codigo(texto, catalogo):
+    """Limpia el texto ingresado y devuelve el código si existe en el catálogo, o None si no."""
+    codigo = texto.strip().upper()
+    return codigo if codigo in catalogo else None
+
 
 def main():
     lista_muestras = []

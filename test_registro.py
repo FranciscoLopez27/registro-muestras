@@ -1,6 +1,6 @@
 from datetime import date
 import copy
-from registro import generar_id, validar_muestra, agregar_muestra, listar_muestras
+from registro import generar_id, validar_muestra, agregar_muestra, listar_muestras, normalizar_codigo, CATALOGO_CLIENTES, CATALOGO_ANALISIS
 
 analisis_ok = [{"nombre": "Aerobios mesófilos", "limite": 10000, "unidad": "UFC/g"}, {"nombre": "Enterobacterias", "limite": 100, "unidad": "UFC/ml"}]
 analisis_malo = [{"nombre": "", "limite": -5, "unidad": "kg"}]
@@ -75,3 +75,12 @@ print("\n--- Listado con muestras ---")
 listar_muestras(muestras)
 print("\n--- Listado vacío ---")
 listar_muestras([])
+
+assert normalizar_codigo("A012", CATALOGO_ANALISIS) == "A012"     # válido
+assert normalizar_codigo("a012", CATALOGO_ANALISIS) == "A012"     # minúsculas
+assert normalizar_codigo("  A012  ", CATALOGO_ANALISIS) == "A012" # espacios
+assert normalizar_codigo("A099", CATALOGO_ANALISIS) is None       # no existe
+assert normalizar_codigo("", CATALOGO_ANALISIS) is None           # vacío
+assert normalizar_codigo("   ", CATALOGO_ANALISIS) is None        # solo espacios
+assert normalizar_codigo("0044", CATALOGO_CLIENTES) == "0044"     # sirve para clientes
+print("normalizar_codigo: todas las pruebas pasaron")
