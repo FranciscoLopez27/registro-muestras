@@ -86,7 +86,7 @@ PARA CADA codigo, datos EN catalogo:
 FIN PARA
 MIENTRAS VERDADERO:
     codigo_ingresado ← PEDIR "Ingrese el código :"
-    codigo_ingresado ← QUITAR ESPACIOS EXTREMOS y PASAR A MAYUSCULA codigo_ingresado  
+    codigo_ingresado ← QUITAR ESPACIOS EXTREMOS y PASAR A MAYUSCULA   
     SI codigo_ingresado ESTA VACIO:
         MOSTRAR "El codigo no puede ser vacio, favor digitar uno valido en la lista"
         CONTINUA

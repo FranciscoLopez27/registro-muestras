@@ -154,6 +154,48 @@ def normalizar_codigo(texto, catalogo):
     codigo = texto.strip().upper()
     return codigo if codigo in catalogo else None
 
+def elegir_codigo(catalogo, titulo):
+    """Muestra las opciones del catálogo y pide un código hasta que sea válido. Devuelve el código."""
+    print(titulo)
+    for codigo, datos in catalogo.items():
+        nombre_elemento = datos["nombre"]
+        print(f"{codigo}: {nombre_elemento}")
+    while True:
+        codigo_ingresado = input("Ingresar un codigo valido en la lista: ").strip()
+        if len(codigo_ingresado) == 0:
+            print("El codigo ingresado no puede estar vacio, favor digitar uno valido de la lista")
+            continue
+        codigo_normalizado = normalizar_codigo(codigo_ingresado,catalogo)
+        if codigo_normalizado is None:
+            print("El codigo ingresado no se encuentra en la lista")
+            print("Favor volver a intentar con un codigo valido en la lista")
+            continue
+        return codigo_normalizado
+
+def unidad_desde_opcion(texto,unidades):
+    opcion_usuario = texto.strip()
+    if opcion_usuario.isdigit():
+        opcion_transformada = int(opcion_usuario)
+        if opcion_transformada <= 0 or opcion_transformada > len(unidades):
+            return None
+        unidad_elegida = unidades[opcion_transformada - 1]
+        return unidad_elegida        
+    return None
+
+def elegir_unidad(unidades):
+    """Muestra las unidades numeradas y pide una opción hasta que sea válida.
+    Devuelve la unidad elegida."""
+    print("Las unidades disponibles para este analisis son: \n")
+    for indice, unidad in enumerate(unidades, start=1):
+        print(f"{indice}: [{unidad}]")
+    while True:
+        eleccion_usuario = input("Ingrese el numero que representa a la unidad que necesita: \n")
+        eleccion_unidad = unidad_desde_opcion(eleccion_usuario, unidades)
+        if eleccion_unidad is None:
+            print("La eleccion digitada no es valida\n")
+            print(f"Favor ingresar un numero entre 1 y {len(unidades)}\n")
+            continue
+        return eleccion_unidad
 
 def main():
     lista_muestras = []

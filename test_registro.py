@@ -1,7 +1,9 @@
 from datetime import date
 import copy
-from registro import generar_id, validar_muestra, agregar_muestra, listar_muestras, normalizar_codigo, CATALOGO_CLIENTES, CATALOGO_ANALISIS
-
+from registro import (
+    generar_id, validar_muestra, agregar_muestra, listar_muestras,
+    normalizar_codigo, unidad_desde_opcion, CATALOGO_CLIENTES, CATALOGO_ANALISIS,
+)
 analisis_ok = [{"nombre": "Aerobios mesófilos", "limite": 10000, "unidad": "UFC/g"}, {"nombre": "Enterobacterias", "limite": 100, "unidad": "UFC/ml"}]
 analisis_malo = [{"nombre": "", "limite": -5, "unidad": "kg"}]
 
@@ -84,3 +86,17 @@ assert normalizar_codigo("", CATALOGO_ANALISIS) is None           # vacío
 assert normalizar_codigo("   ", CATALOGO_ANALISIS) is None        # solo espacios
 assert normalizar_codigo("0044", CATALOGO_CLIENTES) == "0044"     # sirve para clientes
 print("normalizar_codigo: todas las pruebas pasaron")
+
+# ---------- unidad_desde_opcion ----------
+unidades = ["UFC/g", "UFC/ml"]
+
+assert unidad_desde_opcion("1", unidades) == "UFC/g"
+assert unidad_desde_opcion("2", unidades) == "UFC/ml"
+assert unidad_desde_opcion(" 2 ", unidades) == "UFC/ml"    # espacios
+assert unidad_desde_opcion("3", unidades) is None          # fuera de rango
+assert unidad_desde_opcion("0", unidades) is None
+assert unidad_desde_opcion("-1", unidades) is None         # negativo
+assert unidad_desde_opcion("UFC/g", unidades) is None      # no es un número
+assert unidad_desde_opcion("", unidades) is None           # vacío
+assert unidad_desde_opcion("1", ["UFC/ml"]) == "UFC/ml"    # una sola unidad
+print("unidad_desde_opcion: todas las pruebas pasaron")
