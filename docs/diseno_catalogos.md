@@ -76,9 +76,25 @@ Otra regla seria en que en una muestra no pueden haber metodos repetidos solicit
 ## Pseudo codigo de seleccion en los catalogos
 
 Algoritmo: seleccion_opcion_catalogo  
-Entradas: Catalogo (de los clientes o de los analisis)  
-Salida: Codigo y nombre de la selección del usuario  
+Entradas: Catalogo (de los clientes o de los analisis), titulo (puede ser "Seleccione el cliente:" o "Seleccione el analisis:") 
+Salida: Codigo de la selección del usuario  
 
-MOSTRAR "LISTA DE {catalogo}"
-PARA CADA etiqueta, diccionario EN catalogo:  
-    MOSTRAR "{etiqueta}: {diccionario["nombre"]}  
+MOSTRAR titulo
+PARA CADA codigo, datos EN catalogo:  
+    nombre ← valor de la etiqueta nombre en datos
+    MOSTRAR codigo: nombre 
+FIN PARA
+MIENTRAS VERDADERO:
+    codigo_ingresado ← PEDIR "Ingrese el código :"
+    codigo_ingresado ← QUITAR ESPACIOS EXTREMOS y PASAR A MAYUSCULA codigo_ingresado  
+    SI codigo_ingresado ESTA VACIO:
+        MOSTRAR "El codigo no puede ser vacio, favor digitar uno valido en la lista"
+        CONTINUA
+    FIN SI
+
+    SI codigo_ingresado NO ESTA EN catalogo ENTONCES:
+        MOSTRAR "El codigo ingresado no se encuentra en la lista, favor vuelva a intentar con un codigo valido en la lista"
+        CONTINUA
+    FIN SI
+    DEVOLVER codigo_ingresado
+FIN MIENTRAS
