@@ -98,3 +98,19 @@ MIENTRAS VERDADERO:
     FIN SI
     DEVOLVER codigo_ingresado
 FIN MIENTRAS
+
+Parte 3: Pedir un análisis desde el catálogo (40 minutos)
+
+Una función que arme el análisis tal como lo definiste en tu diseño:
+
+Elige el código del análisis con elegir_codigo.
+Obtiene sus datos del catálogo.
+Elige la unidad entre las permitidas para ese análisis.
+Pide el límite (puedes reutilizar el ciclo que ya tienes en generar_diccionario_analisis).
+Devuelve el diccionario con la copia de los datos vigentes: código, nombre, norma, unidad y límite.
+
+Pruébala a mano desde el intérprete, igual que la primera.
+
+Todavía no la conectes con pedir_analisis ni borres nada: eso será el siguiente paso. Al terminar, ejecuta py test_registro.py para confirmar que no rompiste nada, y haz commit y push.
+
+Muéstrame cada función cuando la tengas.

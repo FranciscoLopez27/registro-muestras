@@ -188,14 +188,41 @@ def elegir_unidad(unidades):
     print("Las unidades disponibles para este analisis son: \n")
     for indice, unidad in enumerate(unidades, start=1):
         print(f"{indice}: [{unidad}]")
+    print("Si necesita el reporte con otra unidad favor contactar a jefatura")
     while True:
         eleccion_usuario = input("Ingrese el numero que representa a la unidad que necesita: \n")
         eleccion_unidad = unidad_desde_opcion(eleccion_usuario, unidades)
         if eleccion_unidad is None:
             print("La eleccion digitada no es valida\n")
+            if len(unidades)==1:
+                print("Favor ingresar 1 para elegir la unica unidad")
+                continue
             print(f"Favor ingresar un numero entre 1 y {len(unidades)}\n")
             continue
         return eleccion_unidad
+
+def pedir_analisis_catalogo():
+    codigo_del_analisis = elegir_codigo(CATALOGO_ANALISIS, "Seleccione el análisis: ")
+    datos_analisis = CATALOGO_ANALISIS[codigo_del_analisis]
+    nombre_analisis = datos_analisis["nombre"]
+    norma_analisis = datos_analisis["norma"]
+    lista_unidad_analisis = datos_analisis["unidades"]
+    unidad_seleccionada = elegir_unidad(lista_unidad_analisis)
+    while True:
+        limite_conteo = input("Ingrese el limite de conteo para el análisis: \n").strip()
+        if limite_conteo.isdigit():
+            limite_conteo = int(limite_conteo)
+            break
+        else:
+            print("Error: Limite de conteo debe ser un numero, ingresar nuevamente")
+    analisis_final = {
+        "codigo": codigo_del_analisis,
+        "nombre": nombre_analisis,
+        "norma": norma_analisis,
+        "unidad": unidad_seleccionada,
+        "limite": limite_conteo
+    }
+    return analisis_final
 
 def main():
     lista_muestras = []
