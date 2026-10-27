@@ -46,7 +46,7 @@ def validar_muestra(datos_muestra):
     elif len(cliente) != 4:
         lista_errores.append("El codigo del cliente debe ser de 4 digitos")
 
-    elif not cliente in CLIENTES_REGISTRADOS:
+    elif cliente not in CATALOGO_CLIENTES:
         lista_errores.append("El codigo del cliente no corresponde a un cliente registrado en la base de datos")
 
     if len(analisis) == 0:
@@ -85,12 +85,12 @@ def agregar_muestra(lista_muestras, datos_muestra):
 
 def listar_muestras(lista_muestras):
     if len(lista_muestras) == 0:
-        print("No se encuentran muestras registradas en la base de datos")
+        print("\nNo se encuentran muestras registradas en la base de datos")
     else:
         for muestra in lista_muestras:
             print(
-                f"id: {muestra['id']} || cliente: {muestra['cliente']} || descripcion: {muestra['descripcion']} ||"
-                f" estado: {muestra['estado']} || fecha: {muestra['fecha_ingreso']}"
+                f"\nid: {muestra['id']} || cliente: {muestra['cliente']} || descripcion: {muestra['descripcion']} ||"
+                f" estado: {muestra['estado']} || fecha: {muestra['fecha_ingreso']}\n"
                 )
             for analisis in muestra["analisis"]:
                 print(f"Nombre analisis: {analisis['nombre']} || Limite conteo: {analisis['limite']} || Unidad: {analisis['unidad']}")
@@ -102,19 +102,19 @@ def mostrar_menu():
     print("\n--------   Registro de muestras   --------")
     print("1. Agregar muestra")
     print("2. Listar muestras")
-    print("3. Salir")
+    print("3. Salir\n")
 
 def generar_diccionario_analisis():
     """Solicita los datos al usuario y genera un diccionario con la información"""
-    nombre_analisis = input("Ingrese nombre de análisis: \n")
-    unidad_conteo = input("Ingrese la unidad del conteo ej: UFC/g ...\n")
+    nombre_analisis = input("\nIngrese nombre de análisis: ")
+    unidad_conteo = input("\nIngrese la unidad del conteo ej: UFC/g ...")
     while True:
-        limite_conteo = input("Ingrese el limite de conteo para el análisis: \n").strip()
+        limite_conteo = input("\nIngrese el limite de conteo para el análisis: ").strip()
         if limite_conteo.isdigit():
             limite_conteo = int(limite_conteo)
             break
         else:
-            print("Error: Limite de conteo debe ser un numero, ingresar nuevamente")
+            print("\nError: Limite de conteo debe ser un numero, ingresar nuevamente")
     datos_analisis = {
         "nombre" : nombre_analisis,
         "limite" : limite_conteo,
@@ -129,21 +129,21 @@ def pedir_analisis():
     lista_analisis.append(datos_analisis)
     while True:
         if len(lista_analisis) == len(CATALOGO_ANALISIS):
-            print("Todos los analisis del catalogo han sido registrados para la muestra")
+            print("\nTodos los analisis del catalogo han sido registrados para la muestra")
             return lista_analisis
-        opcion_usuario = input("¿Agregar otro análisis? (s/n)\n").strip().lower()
+        opcion_usuario = input("¿Agregar otro análisis? (s/n): \n").strip().lower()
         if opcion_usuario == "s":
             datos_analisis = pedir_analisis_catalogo(lista_analisis)
             lista_analisis.append(datos_analisis)
         elif opcion_usuario == "n":
             break
         else:
-            print("Opcion ingresada invalida, opciones posibles: S | N")
+            print("\nOpcion ingresada invalida, opciones posibles: S | N")
     return lista_analisis
 
 def pedir_datos_muestra():
-    cliente_muestra = input("Ingresar codigo de cliente (cuatro digitos, anteponiendo 0):\n").strip()
-    descripcion_muestra = input("Ingresar descripción de la muestra:\n").strip()
+    cliente_muestra = elegir_codigo(CATALOGO_CLIENTES, "\nElegir codigo de cliente: ")
+    descripcion_muestra = input("\nIngresar descripción de la muestra: ").strip()
     analisis_muestra = pedir_analisis()
     datos_muestra = {
         "cliente": cliente_muestra,
@@ -162,16 +162,16 @@ def elegir_codigo(catalogo, titulo):
     print(titulo)
     for codigo, datos in catalogo.items():
         nombre_elemento = datos["nombre"]
-        print(f"{codigo}: {nombre_elemento}")
+        print(f"\n{codigo}: {nombre_elemento}")
     while True:
-        codigo_ingresado = input("Ingresar un codigo valido en la lista: ").strip()
+        codigo_ingresado = input("\nIngresar un codigo valido en la lista: ").strip()
         if len(codigo_ingresado) == 0:
-            print("El codigo ingresado no puede estar vacio, favor digitar uno valido de la lista")
+            print("\nEl codigo ingresado no puede estar vacio, favor digitar uno valido de la lista")
             continue
         codigo_normalizado = normalizar_codigo(codigo_ingresado,catalogo)
         if codigo_normalizado is None:
-            print("El codigo ingresado no se encuentra en la lista")
-            print("Favor volver a intentar con un codigo valido en la lista")
+            print("\nEl codigo ingresado no se encuentra en la lista")
+            print("\nFavor volver a intentar con un codigo valido en la lista")
             continue
         return codigo_normalizado
 
@@ -188,25 +188,25 @@ def unidad_desde_opcion(texto,unidades):
 def elegir_unidad(unidades):
     """Muestra las unidades numeradas y pide una opción hasta que sea válida.
     Devuelve la unidad elegida."""
-    print("Las unidades disponibles para este analisis son: \n")
+    print("\nLas unidades disponibles para este analisis son: ")
     for indice, unidad in enumerate(unidades, start=1):
         print(f"{indice}: [{unidad}]")
-    print("Si necesita el reporte con otra unidad favor contactar a jefatura")
+    print("\nSi necesita el reporte con otra unidad favor contactar a jefatura")
     while True:
         eleccion_usuario = input("Ingrese el numero que representa a la unidad que necesita: \n")
         eleccion_unidad = unidad_desde_opcion(eleccion_usuario, unidades)
         if eleccion_unidad is None:
-            print("La eleccion digitada no es valida\n")
+            print("\nLa eleccion digitada no es valida")
             if len(unidades)==1:
                 print("Favor ingresar 1 para elegir la unica unidad")
                 continue
-            print(f"Favor ingresar un numero entre 1 y {len(unidades)}\n")
+            print(f"\nFavor ingresar un numero entre 1 y {len(unidades)}")
             continue
         return eleccion_unidad
 
 def pedir_analisis_catalogo(lista_analisis_agregados):
     while True:
-        codigo_del_analisis = elegir_codigo(CATALOGO_ANALISIS, "Seleccione el análisis: ")
+        codigo_del_analisis = elegir_codigo(CATALOGO_ANALISIS, "\nSeleccione el análisis: ")
         if codigo_ya_agregado(lista_analisis_agregados, codigo_del_analisis):
             print("La muestra ya tiene registrado ese analisis, favor seleccionar otro")
             continue
@@ -222,7 +222,8 @@ def pedir_analisis_catalogo(lista_analisis_agregados):
             limite_conteo = int(limite_conteo)
             break
         else:
-            print("Error: Limite de conteo debe ser un numero, ingresar nuevamente")
+            print("\nError: Limite de conteo debe ser un numero entero mayor o igual a 0")
+            print("Ingresar nuevamente\n")
     analisis_final = {
         "codigo": codigo_del_analisis,
         "nombre": nombre_analisis,
@@ -235,7 +236,6 @@ def pedir_analisis_catalogo(lista_analisis_agregados):
 def codigo_ya_agregado(lista_analisis, codigo):
     return any(analisis["codigo"] == codigo for analisis in lista_analisis)
     
-
 def main():
     lista_muestras = []
     while True:
@@ -249,16 +249,19 @@ def main():
                     print(f"ERROR AL CREAR LA MUESTRA: {error}")
                     
             else:
-                print("Muestra agregada con exito")
-                print(f"ID de la muestra: {id_nuevo}")
+                print("\nMuestra agregada con exito")
+                print(f"\nID de la muestra: {id_nuevo}")
+                input("Presiones enter para continuar...")
         elif opcion == "2":
             listar_muestras(lista_muestras)
+            input("Presiones enter para continuar...")
         elif opcion == "3":
-            print("Adios...")
+            print("\nAdios...")
             input("Presiones enter para continuar...")
             break
         else:
-            print("Opcion invalida, pruebe nuevamente")
+            print("\nOpcion invalida, pruebe nuevamente")
+            input("Presiones enter para continuar...")
 
 if __name__ == "__main__":
     main()
