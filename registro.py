@@ -125,12 +125,15 @@ def generar_diccionario_analisis():
 def pedir_analisis():
     """Pide al usuario uno o mas análisis y devuleve la lista de estos"""
     lista_analisis = []
-    datos_analisis = generar_diccionario_analisis()
+    datos_analisis = pedir_analisis_catalogo(lista_analisis)
     lista_analisis.append(datos_analisis)
     while True:
+        if len(lista_analisis) == len(CATALOGO_ANALISIS):
+            print("Todos los analisis del catalogo han sido registrados para la muestra")
+            return lista_analisis
         opcion_usuario = input("¿Agregar otro análisis? (s/n)\n").strip().lower()
         if opcion_usuario == "s":
-            datos_analisis = generar_diccionario_analisis()
+            datos_analisis = pedir_analisis_catalogo(lista_analisis)
             lista_analisis.append(datos_analisis)
         elif opcion_usuario == "n":
             break
@@ -201,8 +204,13 @@ def elegir_unidad(unidades):
             continue
         return eleccion_unidad
 
-def pedir_analisis_catalogo():
-    codigo_del_analisis = elegir_codigo(CATALOGO_ANALISIS, "Seleccione el análisis: ")
+def pedir_analisis_catalogo(lista_analisis_agregados):
+    while True:
+        codigo_del_analisis = elegir_codigo(CATALOGO_ANALISIS, "Seleccione el análisis: ")
+        if codigo_ya_agregado(lista_analisis_agregados, codigo_del_analisis):
+            print("La muestra ya tiene registrado ese analisis, favor seleccionar otro")
+            continue
+        break
     datos_analisis = CATALOGO_ANALISIS[codigo_del_analisis]
     nombre_analisis = datos_analisis["nombre"]
     norma_analisis = datos_analisis["norma"]
@@ -223,6 +231,10 @@ def pedir_analisis_catalogo():
         "limite": limite_conteo
     }
     return analisis_final
+
+def codigo_ya_agregado(lista_analisis, codigo):
+    return any(analisis["codigo"] == codigo for analisis in lista_analisis)
+    
 
 def main():
     lista_muestras = []

@@ -2,7 +2,7 @@ from datetime import date
 import copy
 from registro import (
     generar_id, validar_muestra, agregar_muestra, listar_muestras,
-    normalizar_codigo, unidad_desde_opcion, CATALOGO_CLIENTES, CATALOGO_ANALISIS,
+    normalizar_codigo, unidad_desde_opcion, CATALOGO_CLIENTES, CATALOGO_ANALISIS, codigo_ya_agregado
 )
 analisis_ok = [{"nombre": "Aerobios mesófilos", "limite": 10000, "unidad": "UFC/g"}, {"nombre": "Enterobacterias", "limite": 100, "unidad": "UFC/ml"}]
 analisis_malo = [{"nombre": "", "limite": -5, "unidad": "kg"}]
@@ -100,3 +100,17 @@ assert unidad_desde_opcion("UFC/g", unidades) is None      # no es un número
 assert unidad_desde_opcion("", unidades) is None           # vacío
 assert unidad_desde_opcion("1", ["UFC/ml"]) == "UFC/ml"    # una sola unidad
 print("unidad_desde_opcion: todas las pruebas pasaron")
+
+
+# ---------- codigo_ya_agregado ----------
+agregados = [
+    {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2", "unidad": "UFC/g", "limite": 100},
+    {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2", "unidad": "UFC/g", "limite": 500},
+]
+
+assert codigo_ya_agregado([], "A012") is False          # lista vacía
+assert codigo_ya_agregado(agregados, "A012") is True    # presente
+assert codigo_ya_agregado(agregados, "A019") is True    # presente, no en la primera posición
+assert codigo_ya_agregado(agregados, "A013") is False   # ausente
+assert codigo_ya_agregado(agregados, "A01") is False    # parecido, pero no igual
+print("codigo_ya_agregado: todas las pruebas pasaron")
