@@ -58,7 +58,7 @@ def validar_muestra(datos_muestra):
     lista_codigos_analisis = [analisis_individual["codigo"] for analisis_individual in analisis]
     if len(lista_codigos_analisis) != len(set(lista_codigos_analisis)):
         lista_errores.append("No pueden haber analisis repetidos para una muestra")
-        
+
     for analisis_individual in analisis:
 
         if not analisis_individual["nombre"].strip():
@@ -99,13 +99,18 @@ def listar_muestras(lista_muestras):
         print("\nNo se encuentran muestras registradas en la base de datos")
     else:
         for muestra in lista_muestras:
+            codigo_cliente = muestra['cliente']
+            nombre_cliente = CATALOGO_CLIENTES.get(codigo_cliente, {}).get('nombre', "Cliente desconocido")
             print(
-                f"\nid: {muestra['id']} || cliente: {muestra['cliente']} || descripcion: {muestra['descripcion']} ||"
-                f" estado: {muestra['estado']} || fecha: {muestra['fecha_ingreso']}\n"
+                f"\nID: {muestra['id']} || Cliente: {codigo_cliente} - {nombre_cliente} || "
+                f" Descripcion: {muestra['descripcion']} || Estado: {muestra['estado']} || Fecha: {muestra['fecha_ingreso']}\n"
                 )
+            print("Analisis asociados a la muestra: ")
             for analisis in muestra["analisis"]:
-                print(f"Nombre analisis: {analisis['nombre']} || Limite conteo: {analisis['limite']} || Unidad: {analisis['unidad']}")
+                print(f"\nNombre analisis: {analisis['nombre']} || Codigo: {analisis['codigo']} || Norma: {analisis['norma']} || "
+                      f"Limite conteo: {analisis['limite']} || Unidad: {analisis['unidad']}")
             print("")
+            print("-------------------O--------------------")
     return
 
 def mostrar_menu():
