@@ -15,21 +15,7 @@ CATALOGO_ANALISIS = {
     "A019": {"nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2", "unidades": ["UFC/g", "UFC/ml"]},
 }
 
-#Codigo de unidades de conteo
-UNIDADES_VALIDAS = {"UFC/g", "UFC/ml", "UFC/swab", "NMP/g", "NMP/ml"}
-UNIDADES_VALIDAS_MINUSCULAS = {unidad.lower() for unidad in UNIDADES_VALIDAS}
 
-#Codigos de clientes registrados
-CLIENTES_REGISTRADOS = {"0042", "1234", "5678"}
-
-def es_cliente_valido(cliente):
-    return len(cliente) == 4 and cliente.isdigit() and cliente in CLIENTES_REGISTRADOS 
-
-def es_unidad_valida(unidad):
-    for _, analisis in CATALOGO_ANALISIS.items():
-        if unidad in analisis["unidades"]:
-            return True
-    return False
 
 def generar_id(numero):
     return f"M-{numero:04d}"
@@ -118,24 +104,6 @@ def mostrar_menu():
     print("1. Agregar muestra")
     print("2. Listar muestras")
     print("3. Salir\n")
-
-def generar_diccionario_analisis():
-    """Solicita los datos al usuario y genera un diccionario con la información"""
-    nombre_analisis = input("\nIngrese nombre de análisis: ")
-    unidad_conteo = input("\nIngrese la unidad del conteo ej: UFC/g ...")
-    while True:
-        limite_conteo = input("\nIngrese el limite de conteo para el análisis: ").strip()
-        if limite_conteo.isdigit():
-            limite_conteo = int(limite_conteo)
-            break
-        else:
-            print("\nError: Limite de conteo debe ser un numero, ingresar nuevamente")
-    datos_analisis = {
-        "nombre" : nombre_analisis,
-        "limite" : limite_conteo,
-        "unidad" : unidad_conteo
-        }
-    return datos_analisis
 
 def pedir_analisis():
     """Pide al usuario uno o mas análisis y devuleve la lista de estos"""
