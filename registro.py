@@ -26,7 +26,10 @@ def es_cliente_valido(cliente):
     return len(cliente) == 4 and cliente.isdigit() and cliente in CLIENTES_REGISTRADOS 
 
 def es_unidad_valida(unidad):
-    return unidad.lower() in UNIDADES_VALIDAS_MINUSCULAS
+    for _, analisis in CATALOGO_ANALISIS.items():
+        if unidad in analisis["unidades"]:
+            return True
+    return False
 
 def generar_id(numero):
     return f"M-{numero:04d}"
@@ -51,20 +54,29 @@ def validar_muestra(datos_muestra):
 
     if len(analisis) == 0:
         lista_errores.append("La muestras creadas deben tener asociado minimo un analisis para registrarse")
-    
+
+    lista_codigos_analisis = [analisis_individual["codigo"] for analisis_individual in analisis]
+    if len(lista_codigos_analisis) != len(set(lista_codigos_analisis)):
+        lista_errores.append("No pueden haber analisis repetidos para una muestra")
+        
     for analisis_individual in analisis:
 
-        if  not analisis_individual["nombre"].strip():
+        if not analisis_individual["nombre"].strip():
             lista_errores.append("Todos los analisis ingresados deben tener nombre")
 
         if analisis_individual["limite"] < 0:
             lista_errores.append("El limite de conteo ingresado debe ser mayor o igual a 0")
 
-        if not es_unidad_valida(analisis_individual["unidad"]):
-            lista_errores.append(f"La unidad de conteo del analisis {analisis_individual["nombre"]} ingresados no esta registrada")
+        codigo_analisis = analisis_individual["codigo"]
+        if codigo_analisis not in CATALOGO_ANALISIS:
+            lista_errores.append(f"El codigo: {codigo_analisis} no es un analisis registrado en la base de datos")
+            continue
+
+        unidades_permitidas = CATALOGO_ANALISIS[codigo_analisis]["unidades"]
+        if analisis_individual["unidad"] not in unidades_permitidas:
+            lista_errores.append(f"La unidad de conteo {analisis_individual["unidad"]} del analisis de {analisis_individual["nombre"]} ingresados no esta registrada para ese analisis")
 
     return lista_errores
-
 
 def agregar_muestra(lista_muestras, datos_muestra):
     
@@ -82,7 +94,6 @@ def agregar_muestra(lista_muestras, datos_muestra):
     
     return(None, lista_errores)
     
-
 def listar_muestras(lista_muestras):
     if len(lista_muestras) == 0:
         print("\nNo se encuentran muestras registradas en la base de datos")
@@ -96,7 +107,6 @@ def listar_muestras(lista_muestras):
                 print(f"Nombre analisis: {analisis['nombre']} || Limite conteo: {analisis['limite']} || Unidad: {analisis['unidad']}")
             print("")
     return
-
 
 def mostrar_menu():
     print("\n--------   Registro de muestras   --------")

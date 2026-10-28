@@ -1,11 +1,14 @@
 from datetime import date
-import copy
 from registro import (
     generar_id, validar_muestra, agregar_muestra, listar_muestras,
     normalizar_codigo, unidad_desde_opcion, CATALOGO_CLIENTES, CATALOGO_ANALISIS, codigo_ya_agregado
 )
-analisis_ok = [{"nombre": "Aerobios mesófilos", "limite": 10000, "unidad": "UFC/g"}, {"nombre": "Enterobacterias", "limite": 100, "unidad": "UFC/ml"}]
-analisis_malo = [{"nombre": "", "limite": -5, "unidad": "kg"}]
+
+analisis_ok = [
+    {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2", "unidad": "UFC/g", "limite": 100},
+    {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2", "unidad": "UFC/ml", "limite": 1000},
+]
+analisis_malo = [{"codigo": "A099", "nombre": "", "norma": "", "unidad": "kg", "limite": -5}]
 
 datos_ok = {
     "cliente": "0042",
@@ -34,10 +37,22 @@ assert len(validar_muestra({**datos_ok, "analisis": analisis_malo})) == 3
 assert len(validar_muestra({**datos_ok, "cliente": "99", "analisis": analisis_malo})) == 4
 
 # Casos válidos en el borde
-limite_cero = [{"nombre": "Salmonella", "limite": 0, "unidad": "UFC/g"}]
+limite_cero = [{"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2", "unidad": "UFC/g", "limite": 0}]
 assert validar_muestra({**datos_ok, "analisis": limite_cero}) == []   # 0 es válido
-unidad_minuscula = [{"nombre": "Coliformes", "limite": 100, "unidad": "nmp/g"}]
-assert validar_muestra({**datos_ok, "analisis": unidad_minuscula}) == []
+
+# Unidades según el análisis
+coliformes_ok = [{"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832", "unidad": "UFC/ml", "limite": 100}]
+coliformes_mal = [{"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832", "unidad": "UFC/g", "limite": 100}]
+assert validar_muestra({**datos_ok, "analisis": coliformes_ok}) == []
+assert len(validar_muestra({**datos_ok, "analisis": coliformes_mal})) == 1   # unidad no permitida para ese análisis
+
+# Código de análisis inexistente
+codigo_inexistente = [{"codigo": "A099", "nombre": "Desconocido", "norma": "", "unidad": "UFC/g", "limite": 10}]
+assert len(validar_muestra({**datos_ok, "analisis": codigo_inexistente})) == 1
+
+# Análisis repetido
+repetido = [analisis_ok[0], analisis_ok[0]]
+assert len(validar_muestra({**datos_ok, "analisis": repetido})) == 1
 print("validar_muestra: todas las pruebas pasaron")
 
 # ---------- agregar_muestra ----------
@@ -63,12 +78,12 @@ assert "id" not in datos_ok                   # los datos originales no se modif
 
 # Copia profunda: cambiar los datos originales no altera la muestra registrada
 datos_otro = {
-    "cliente": "1234",
+    "cliente": "0044",
     "descripcion": "Queso fresco",
-    "analisis": [{"nombre": "Coliformes", "limite": 100, "unidad": "NMP/g"}],
+    "analisis": [{"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832", "unidad": "UFC/ml", "limite": 100}],
 }
 agregar_muestra(muestras, datos_otro)
-datos_otro["analisis"].append({"nombre": "Hongos", "limite": 50, "unidad": "UFC/g"})
+datos_otro["analisis"].append({"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2", "unidad": "UFC/g", "limite": 100})
 assert len(muestras[2]["analisis"]) == 1
 print("agregar_muestra: todas las pruebas pasaron")
 
