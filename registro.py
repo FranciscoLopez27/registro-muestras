@@ -15,7 +15,7 @@ CATALOGO_ANALISIS = {
     "A019": {"nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2", "unidades": ["UFC/g", "UFC/ml"]},
 }
 
-
+ESTADOS_POSIBLES = ("enviada","confirmada","liberada")
 
 def generar_id(numero):
     return f"M-{numero:04d}"
@@ -218,7 +218,27 @@ def pedir_analisis_catalogo(lista_analisis_agregados):
 
 def codigo_ya_agregado(lista_analisis, codigo):
     return any(analisis["codigo"] == codigo for analisis in lista_analisis)
+
+def buscar_muestra(lista_muestras, id_muestra):
+    id_muestra = id_muestra.upper().replace(" ","")
+    return next((muestra for muestra in lista_muestras if id_muestra == muestra.get("id")), None)
+
+def siguiente_estado(estado_actual):
+    if estado_actual not in ESTADOS_POSIBLES:
+        return None
+    indice = ESTADOS_POSIBLES.index(estado_actual)
+    if indice == len(ESTADOS_POSIBLES)-1:
+        return None
+    return ESTADOS_POSIBLES[indice+1]
     
+    
+    for indice, estado in enumerate(ESTADOS_POSIBLES):
+        if estado == estado_actual:
+            if indice == len(ESTADOS_POSIBLES)-1:
+                return None
+            return ESTADOS_POSIBLES[indice+1]
+    return None
+
 def main():
     lista_muestras = []
     while True:

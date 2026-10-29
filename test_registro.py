@@ -1,7 +1,8 @@
 from datetime import date
 from registro import (
     generar_id, validar_muestra, agregar_muestra, listar_muestras,
-    normalizar_codigo, unidad_desde_opcion, CATALOGO_CLIENTES, CATALOGO_ANALISIS, codigo_ya_agregado
+    normalizar_codigo, unidad_desde_opcion, CATALOGO_CLIENTES, CATALOGO_ANALISIS, codigo_ya_agregado,
+    ESTADOS_POSIBLES, buscar_muestra, siguiente_estado
 )
 
 analisis_ok = [
@@ -129,3 +130,21 @@ assert codigo_ya_agregado(agregados, "A019") is True    # presente, no en la pri
 assert codigo_ya_agregado(agregados, "A013") is False   # ausente
 assert codigo_ya_agregado(agregados, "A01") is False    # parecido, pero no igual
 print("codigo_ya_agregado: todas las pruebas pasaron")
+
+# ---------- buscar_muestra ----------
+assert buscar_muestra(muestras, "M-0002")["id"] == "M-0002"
+assert buscar_muestra(muestras, "m-0002")["id"] == "M-0002"     # minúsculas
+assert buscar_muestra(muestras, " M-0002 ")["id"] == "M-0002"   # espacios en los extremos
+assert buscar_muestra(muestras, "M- 0002")["id"] == "M-0002"    # espacio en el medio
+assert buscar_muestra(muestras, "M-9999") is None               # no existe
+assert buscar_muestra(muestras, "") is None                     # vacío
+assert buscar_muestra([], "M-0001") is None                     # lista vacía
+print("buscar_muestra: todas las pruebas pasaron")
+
+# ---------- siguiente_estado ----------
+assert siguiente_estado("enviada") == "confirmada"
+assert siguiente_estado("confirmada") == "liberada"
+assert siguiente_estado("liberada") is None       # último estado
+assert siguiente_estado("cancelada") is None      # fuera de la secuencia
+assert siguiente_estado("desconocido") is None
+print("siguiente_estado: todas las pruebas pasaron")
