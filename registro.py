@@ -103,7 +103,8 @@ def mostrar_menu():
     print("\n--------   Registro de muestras   --------")
     print("1. Agregar muestra")
     print("2. Listar muestras")
-    print("3. Salir\n")
+    print("3. Buscar muestra")
+    print("4. Salir\n")
 
 def pedir_analisis():
     """Pide al usuario uno o mas análisis y devuleve la lista de estos"""
@@ -240,7 +241,44 @@ def siguiente_estado(estado_actual):
     return None
 
 def main():
-    lista_muestras = []
+    lista_muestras = [
+        {
+            "id": "M-0001", "cliente": "0042", "descripcion": "Jugo de naranja lote 55",
+            "estado": "enviada", "fecha_ingreso": "2026-10-27",
+            "analisis": [
+                {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
+                 "unidad": "UFC/ml", "limite": 10, "resultado": None},
+                {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
+                 "unidad": "UFC/ml", "limite": 100, "resultado": None},
+            ],
+        },
+        {
+            "id": "M-0002", "cliente": "0044", "descripcion": "Carne molida lote 12",
+            "estado": "confirmada", "fecha_ingreso": "2026-10-27",
+            "analisis": [
+                {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
+                 "unidad": "UFC/g", "limite": 100, "resultado": 250},
+                {"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832",
+                 "unidad": "UFC/ml", "limite": 50, "resultado": None},
+            ],
+        },
+        {
+            "id": "M-0003", "cliente": "0047", "descripcion": "Lechuga escarola",
+            "estado": "liberada", "fecha_ingreso": "2026-10-26",
+            "analisis": [
+                {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
+                 "unidad": "UFC/g", "limite": 1000, "resultado": 0},
+            ],
+        },
+        {
+            "id": "M-0004", "cliente": "0042", "descripcion": "Néctar de durazno",
+            "estado": "cancelada", "fecha_ingreso": "2026-10-28",
+            "analisis": [
+                {"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832",
+                 "unidad": "UFC/ml", "limite": 10, "resultado": None},
+            ],
+        },
+    ]
     while True:
         mostrar_menu()
         opcion = input("Elige una opción: ").strip()
@@ -250,21 +288,30 @@ def main():
                 print("La muestra no ha podido ser creada")
                 for error in errores:
                     print(f"ERROR AL CREAR LA MUESTRA: {error}")
-                    
+                input("Presione enter para continuar...")
             else:
                 print("\nMuestra agregada con exito")
                 print(f"\nID de la muestra: {id_nuevo}")
-                input("Presiones enter para continuar...")
+                input("Presione enter para continuar...")
         elif opcion == "2":
             listar_muestras(lista_muestras)
-            input("Presiones enter para continuar...")
+            input("Presione enter para continuar...")
         elif opcion == "3":
+            id_muestra=input("Digite el ID  de la muestra a buscar: \n")
+            resultado_encontrado = buscar_muestra(lista_muestras, id_muestra)
+            if resultado_encontrado is None:
+                print("La muestra digitada no se encuentra registrada...")
+                input("Presione enter para continuar...")
+                continue
+            listar_muestras([resultado_encontrado])
+            input("Presione enter para continuar...")
+        elif opcion == "4":
             print("\nAdios...")
-            input("Presiones enter para continuar...")
+            input("Presione enter para continuar...")
             break
         else:
             print("\nOpcion invalida, pruebe nuevamente")
-            input("Presiones enter para continuar...")
+            input("Presione enter para continuar...")
 
 if __name__ == "__main__":
     main()
