@@ -17,10 +17,10 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 - Comentarios (pendiente) 
 - Analisis:
     - Codigo del analisis
-    - Nombre
-    - Norma  
+    - Nombre (copiados del catalogo)
+    - Norma  (copiados del catalogo)
     - Unidad  
-    - Limite (copiados del catalogo)
+    - Limite  
 
 ## Funcionalidades
 

@@ -17,6 +17,49 @@ CATALOGO_ANALISIS = {
 
 ESTADOS_POSIBLES = ("enviada","confirmada","liberada")
 
+ESTADOS_CANCELABLES = ("enviadas", "confirmadas")
+
+def muestras_de_ejemplo():
+    """Devuelve una lista de muestras de ejemplo para probar el programa."""
+    return [
+        {
+            "id": "M-0001", "cliente": "0042", "descripcion": "Jugo de naranja lote 55",
+            "estado": "enviada", "fecha_ingreso": "2026-10-27",
+            "analisis": [
+                {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
+                 "unidad": "UFC/ml", "limite": 10, "resultado": None},
+                {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
+                 "unidad": "UFC/ml", "limite": 100, "resultado": None},
+            ],
+        },
+        {
+            "id": "M-0002", "cliente": "0044", "descripcion": "Carne molida lote 12",
+            "estado": "confirmada", "fecha_ingreso": "2026-10-27",
+            "analisis": [
+                {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
+                 "unidad": "UFC/g", "limite": 100, "resultado": 250},
+                {"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832",
+                 "unidad": "UFC/ml", "limite": 50, "resultado": None},
+            ],
+        },
+        {
+            "id": "M-0003", "cliente": "0047", "descripcion": "Lechuga escarola",
+            "estado": "liberada", "fecha_ingreso": "2026-10-26",
+            "analisis": [
+                {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
+                 "unidad": "UFC/g", "limite": 1000, "resultado": 0},
+            ],
+        },
+        {
+            "id": "M-0004", "cliente": "0042", "descripcion": "Néctar de durazno",
+            "estado": "cancelada", "fecha_ingreso": "2026-10-28",
+            "analisis": [
+                {"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832",
+                 "unidad": "UFC/ml", "limite": 10, "resultado": None},
+            ],
+        },
+    ]
+
 def generar_id(numero):
     return f"M-{numero:04d}"
 
@@ -70,6 +113,8 @@ def agregar_muestra(lista_muestras, datos_muestra):
     
     if not lista_errores:
         nueva_muestra = copy.deepcopy(datos_muestra)
+        for analisis in nueva_muestra["analisis"]:
+            analisis["resultado"] = None
         nueva_muestra.update({
             "id": generar_id(len(lista_muestras)+1),
             "estado": "enviada",
@@ -240,45 +285,33 @@ def siguiente_estado(estado_actual):
             return ESTADOS_POSIBLES[indice+1]
     return None
 
+def tiene_resultado_pendiente(muestra):
+    return any(analisis["resultado"] is None for analisis in muestra["analisis"])
+
+def avanzar_estado(muestra):
+    lista_errores = []
+    estado_actual = muestra["estado"]
+    nuevo_estado = siguiente_estado(estado_actual)
+    if nuevo_estado is None:
+        lista_errores.append(f"El estado actual de la muestra se encuentra {estado_actual}, por lo que no se puede modificar")
+        return lista_errores
+    if nuevo_estado == "liberada" and tiene_resultado_pendiente(muestra):
+        lista_errores.append("No todos los analisis tienen resultado, por lo que no puede ser liberada")
+    if len(lista_errores) == 0:
+        muestra["estado"] = nuevo_estado
+    return lista_errores
+
+def cancelar_muestra(muestra):
+    lista_errores = []
+    estado_actual = muestra["estado"]
+    if estado_actual not in ESTADOS_CANCELABLES:
+        lista_errores.append(f"La muestra no puede ser cancelada ya que se encuentra en estado: {estado_actual}")
+    if len(lista_errores) == 0:
+        muestra["estado"] = "cancelada"
+    return lista_errores
+
 def main():
-    lista_muestras = [
-        {
-            "id": "M-0001", "cliente": "0042", "descripcion": "Jugo de naranja lote 55",
-            "estado": "enviada", "fecha_ingreso": "2026-10-27",
-            "analisis": [
-                {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
-                 "unidad": "UFC/ml", "limite": 10, "resultado": None},
-                {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
-                 "unidad": "UFC/ml", "limite": 100, "resultado": None},
-            ],
-        },
-        {
-            "id": "M-0002", "cliente": "0044", "descripcion": "Carne molida lote 12",
-            "estado": "confirmada", "fecha_ingreso": "2026-10-27",
-            "analisis": [
-                {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
-                 "unidad": "UFC/g", "limite": 100, "resultado": 250},
-                {"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832",
-                 "unidad": "UFC/ml", "limite": 50, "resultado": None},
-            ],
-        },
-        {
-            "id": "M-0003", "cliente": "0047", "descripcion": "Lechuga escarola",
-            "estado": "liberada", "fecha_ingreso": "2026-10-26",
-            "analisis": [
-                {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
-                 "unidad": "UFC/g", "limite": 1000, "resultado": 0},
-            ],
-        },
-        {
-            "id": "M-0004", "cliente": "0042", "descripcion": "Néctar de durazno",
-            "estado": "cancelada", "fecha_ingreso": "2026-10-28",
-            "analisis": [
-                {"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832",
-                 "unidad": "UFC/ml", "limite": 10, "resultado": None},
-            ],
-        },
-    ]
+    lista_muestras = []
     while True:
         mostrar_menu()
         opcion = input("Elige una opción: ").strip()

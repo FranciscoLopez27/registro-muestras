@@ -2,7 +2,8 @@ from datetime import date
 from registro import (
     generar_id, validar_muestra, agregar_muestra, listar_muestras,
     normalizar_codigo, unidad_desde_opcion, CATALOGO_CLIENTES, CATALOGO_ANALISIS, codigo_ya_agregado,
-    ESTADOS_POSIBLES, buscar_muestra, siguiente_estado
+    ESTADOS_POSIBLES, buscar_muestra, siguiente_estado, tiene_resultado_pendiente, muestras_de_ejemplo,
+    avanzar_estado, cancelar_muestra
 )
 
 analisis_ok = [
@@ -148,3 +149,61 @@ assert siguiente_estado("liberada") is None       # último estado
 assert siguiente_estado("cancelada") is None      # fuera de la secuencia
 assert siguiente_estado("desconocido") is None
 print("siguiente_estado: todas las pruebas pasaron")
+
+assert all(analisis["resultado"] is None for analisis in muestras[0]["analisis"])
+
+# ---------- tiene_resultado_pendiente ----------
+ejemplos = muestras_de_ejemplo()
+
+assert tiene_resultado_pendiente(ejemplos[0]) is True    # M-0001: ningún resultado
+assert tiene_resultado_pendiente(ejemplos[1]) is True    # M-0002: uno con resultado y otro pendiente
+assert tiene_resultado_pendiente(ejemplos[2]) is False   # M-0003: resultado 0, no está pendiente
+assert tiene_resultado_pendiente(ejemplos[3]) is True    # M-0004: ningún resultado
+
+# Todos los análisis con resultado
+completa = ejemplos[1]
+completa["analisis"][1]["resultado"] = 30
+assert tiene_resultado_pendiente(completa) is False
+print("tiene_resultado_pendiente: todas las pruebas pasaron")
+
+# ---------- avanzar_estado ----------
+ejemplos = muestras_de_ejemplo()
+enviada, confirmada, liberada, cancelada = ejemplos
+
+# Enviada → confirmada
+assert avanzar_estado(enviada) == []
+assert enviada["estado"] == "confirmada"
+
+# Confirmada con un resultado pendiente: no se puede liberar
+assert len(avanzar_estado(confirmada)) == 1
+assert confirmada["estado"] == "confirmada"
+
+# Confirmada con todos los resultados: se libera
+confirmada["analisis"][1]["resultado"] = 30
+assert avanzar_estado(confirmada) == []
+assert confirmada["estado"] == "liberada"
+
+# Liberada: no puede avanzar
+assert len(avanzar_estado(liberada)) == 1
+assert liberada["estado"] == "liberada"
+
+# Cancelada: no puede avanzar
+assert len(avanzar_estado(cancelada)) == 1
+assert cancelada["estado"] == "cancelada"
+print("avanzar_estado: todas las pruebas pasaron")
+
+# ---------- cancelar_muestra ----------
+enviada, confirmada, liberada, cancelada = muestras_de_ejemplo()
+
+assert cancelar_muestra(enviada) == []
+assert enviada["estado"] == "cancelada"
+
+assert cancelar_muestra(confirmada) == []
+assert confirmada["estado"] == "cancelada"
+
+assert len(cancelar_muestra(liberada)) == 1
+assert liberada["estado"] == "liberada"
+
+assert len(cancelar_muestra(cancelada)) == 1
+assert cancelada["estado"] == "cancelada"
+print("cancelar_muestra: todas las pruebas pasaron")
