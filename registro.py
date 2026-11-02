@@ -17,7 +17,7 @@ CATALOGO_ANALISIS = {
 
 ESTADOS_POSIBLES = ("enviada","confirmada","liberada")
 
-ESTADOS_CANCELABLES = ("enviadas", "confirmadas")
+ESTADOS_CANCELABLES = ("enviada", "confirmada")
 
 def muestras_de_ejemplo():
     """Devuelve una lista de muestras de ejemplo para probar el programa."""
@@ -143,13 +143,6 @@ def listar_muestras(lista_muestras):
             print("")
             print("-------------------O--------------------")
     return
-
-def mostrar_menu():
-    print("\n--------   Registro de muestras   --------")
-    print("1. Agregar muestra")
-    print("2. Listar muestras")
-    print("3. Buscar muestra")
-    print("4. Salir\n")
 
 def pedir_analisis():
     """Pide al usuario uno o mas análisis y devuleve la lista de estos"""
@@ -310,8 +303,16 @@ def cancelar_muestra(muestra):
         muestra["estado"] = "cancelada"
     return lista_errores
 
+def mostrar_menu():
+    print("\n--------   Registro de muestras   --------")
+    print("1. Agregar muestra")
+    print("2. Listar muestras")
+    print("3. Buscar muestra")
+    print("4. Cambiar estado de muestra")
+    print("5. Salir\n")
+
 def main():
-    lista_muestras = []
+    lista_muestras = muestras_de_ejemplo()
     while True:
         mostrar_menu()
         opcion = input("Elige una opción: ").strip()
@@ -326,9 +327,11 @@ def main():
                 print("\nMuestra agregada con exito")
                 print(f"\nID de la muestra: {id_nuevo}")
                 input("Presione enter para continuar...")
+
         elif opcion == "2":
             listar_muestras(lista_muestras)
             input("Presione enter para continuar...")
+
         elif opcion == "3":
             id_muestra=input("Digite el ID  de la muestra a buscar: \n")
             resultado_encontrado = buscar_muestra(lista_muestras, id_muestra)
@@ -338,10 +341,61 @@ def main():
                 continue
             listar_muestras([resultado_encontrado])
             input("Presione enter para continuar...")
+
         elif opcion == "4":
+            id_muestra=input("Digite el ID de la muestra que se quiere modificar el estado: \n")
+            resultado_encontrado = buscar_muestra(lista_muestras, id_muestra)
+            if resultado_encontrado is None:
+                print("La muestra digitada no se encuentra registrada...")
+                input("Presione enter para continuar...")
+                continue
+            print(f"El estado actual de la muestra es: {resultado_encontrado['estado']}")
+            print("¿Que desea realizar con el estado de la muestra?")
+            opcion_estado = input("1. Avanzar a siguiente estado.\n"
+            "2. Cancelar muestra.\n" 
+            "3. Regresar.\n"
+            "Digite la opcion que desea realizar: ").strip()
+            if opcion_estado == "1":
+                lista_errores = avanzar_estado(resultado_encontrado)
+                if len(lista_errores) != 0:
+                    print("No se ha podido modificar el estado")
+                    for error in lista_errores:
+                        print(error)
+                    input("Presione enter para continuar...")
+                else:
+                    print(f"El estado ha sido cambiado a {resultado_encontrado['estado']}")
+                    input("Presione enter para continuar...")
+            elif opcion_estado == "2":
+                print(f"¿Está seguro de que desea cancelar la muestra {resultado_encontrado['id']}?")
+                confirmacion=input("Esta acción no se puede deshacer y debe estar autorizada por jefatura. (s/n): ").strip().lower()
+                if confirmacion == "s":
+                    lista_errores = cancelar_muestra(resultado_encontrado)
+                    if len(lista_errores) != 0:
+                        print("No se ha podido modificar el estado")
+                        for error in lista_errores:
+                            print(error)
+                        input("Presione enter para continuar...")
+                    else:
+                        print("La muestra ha sido cancelada correctamente")
+                        input("Presione enter para continuar...")
+                elif confirmacion == "n":
+                    print("No se continua el procedimiento de cancelación de la muestra")
+                    input("Presione enter para continuar...")
+                else:
+                    print("Opción no valida, volviendo al menu principal")
+                    input("Presione enter para continuar...")
+            elif opcion_estado == "3":
+                print("Volviendo al menu principal")
+                input("Presione enter para continuar...")
+            else:
+                print("Opcion ingresada no valida, volviendo al menu")
+                input("Presione enter para continuar...")
+                
+        elif opcion == "5":
             print("\nAdios...")
             input("Presione enter para continuar...")
             break
+
         else:
             print("\nOpcion invalida, pruebe nuevamente")
             input("Presione enter para continuar...")
