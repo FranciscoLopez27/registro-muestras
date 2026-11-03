@@ -27,9 +27,9 @@ def muestras_de_ejemplo():
             "estado": "enviada", "fecha_ingreso": "2026-10-27",
             "analisis": [
                 {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
-                 "unidad": "UFC/ml", "limite": 10, "resultado": None},
+                 "unidad": "UFC/ml", "limite": 10, "resultado": None, "fuera_especificacion": None},
                 {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
-                 "unidad": "UFC/ml", "limite": 100, "resultado": None},
+                 "unidad": "UFC/ml", "limite": 100, "resultado": None, "fuera_especificacion": None},
             ],
         },
         {
@@ -37,9 +37,9 @@ def muestras_de_ejemplo():
             "estado": "confirmada", "fecha_ingreso": "2026-10-27",
             "analisis": [
                 {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
-                 "unidad": "UFC/g", "limite": 100, "resultado": 250},
+                 "unidad": "UFC/g", "limite": 100, "resultado": 250, "fuera_especificacion": True},
                 {"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832",
-                 "unidad": "UFC/ml", "limite": 50, "resultado": None},
+                 "unidad": "UFC/ml", "limite": 50, "resultado": None, "fuera_especificacion": None},
             ],
         },
         {
@@ -47,7 +47,7 @@ def muestras_de_ejemplo():
             "estado": "liberada", "fecha_ingreso": "2026-10-26",
             "analisis": [
                 {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
-                 "unidad": "UFC/g", "limite": 1000, "resultado": 0},
+                 "unidad": "UFC/g", "limite": 1000, "resultado": 0, "fuera_especificacion": False},
             ],
         },
         {
@@ -55,7 +55,7 @@ def muestras_de_ejemplo():
             "estado": "cancelada", "fecha_ingreso": "2026-10-28",
             "analisis": [
                 {"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832",
-                 "unidad": "UFC/ml", "limite": 10, "resultado": None},
+                 "unidad": "UFC/ml", "limite": 10, "resultado": None, "fuera_especificacion": None},
             ],
         },
     ]
@@ -115,6 +115,7 @@ def agregar_muestra(lista_muestras, datos_muestra):
         nueva_muestra = copy.deepcopy(datos_muestra)
         for analisis in nueva_muestra["analisis"]:
             analisis["resultado"] = None
+            analisis["fuera_especificacion"] = None
         nueva_muestra.update({
             "id": generar_id(len(lista_muestras)+1),
             "estado": "enviada",
@@ -270,13 +271,6 @@ def siguiente_estado(estado_actual):
         return None
     return ESTADOS_POSIBLES[indice+1]
     
-    
-    for indice, estado in enumerate(ESTADOS_POSIBLES):
-        if estado == estado_actual:
-            if indice == len(ESTADOS_POSIBLES)-1:
-                return None
-            return ESTADOS_POSIBLES[indice+1]
-    return None
 
 def tiene_resultado_pendiente(muestra):
     return any(analisis["resultado"] is None for analisis in muestra["analisis"])
@@ -318,6 +312,28 @@ def pedir_muestra_existente(lista_muestras, mensaje):
         print("La muestra digitada no se encuentra registrada...")
         pausar()
     return resultado_encontrado
+
+def esta_fuera_de_especificacion(analisis):
+    return analisis["resultado"] is not None and analisis["resultado"] > analisis["limite"]
+
+def registrar_resultado(muestra, codigo_analisis, resultado):
+    lista_errores = []
+    if muestra["estado"] != "confirmada":
+        lista_errores.append("La muestra debe estar en estado confirmada para asociarle resultados")
+        return lista_errores
+    if resultado < 0:
+        lista_errores.append("El resultado tiene que ser un valor mayor o igual a 0")
+    analisis_buscado = next((analisis for analisis in muestra["analisis"] if codigo_analisis == analisis.get("codigo")), None)
+    if analisis_buscado is None:
+        lista_errores.append("La muestra ingresada no tiene el analisis registrado")
+    if len(lista_errores) != 0:
+        return lista_errores
+    analisis_buscado["resultado"] = resultado
+    analisis_buscado["fuera_especificacion"] = esta_fuera_de_especificacion(analisis_buscado)
+    return lista_errores
+    
+    
+
 
 def mostrar_menu():
     print("\n--------   Registro de muestras   --------")

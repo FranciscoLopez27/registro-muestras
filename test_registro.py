@@ -3,7 +3,7 @@ from registro import (
     generar_id, validar_muestra, agregar_muestra, listar_muestras,
     normalizar_codigo, unidad_desde_opcion, CATALOGO_CLIENTES, CATALOGO_ANALISIS, codigo_ya_agregado,
     ESTADOS_POSIBLES, buscar_muestra, siguiente_estado, tiene_resultado_pendiente, muestras_de_ejemplo,
-    avanzar_estado, cancelar_muestra
+    avanzar_estado, cancelar_muestra, esta_fuera_de_especificacion, registrar_resultado
 )
 
 analisis_ok = [
@@ -207,3 +207,54 @@ assert liberada["estado"] == "liberada"
 assert len(cancelar_muestra(cancelada)) == 1
 assert cancelada["estado"] == "cancelada"
 print("cancelar_muestra: todas las pruebas pasaron")
+
+# ---------- esta_fuera_de_especificacion ----------
+def analisis_con(resultado, limite=100):
+    return {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
+            "unidad": "UFC/g", "limite": limite, "resultado": resultado}
+
+assert esta_fuera_de_especificacion(analisis_con(250)) is True     # supera el límite
+assert esta_fuera_de_especificacion(analisis_con(100)) is False    # igual al límite
+assert esta_fuera_de_especificacion(analisis_con(0)) is False      # recuento 0
+assert esta_fuera_de_especificacion(analisis_con(None)) is False   # sin resultado
+assert esta_fuera_de_especificacion(analisis_con(1, limite=0)) is True   # límite 0
+print("esta_fuera_de_especificacion: todas las pruebas pasaron")
+
+# ---------- registrar_resultado ----------
+enviada, confirmada, liberada, cancelada = muestras_de_ejemplo()
+
+def analisis_de(muestra, codigo):
+    return next(analisis for analisis in muestra["analisis"] if analisis["codigo"] == codigo)
+
+# Registrar un resultado dentro de especificación
+assert registrar_resultado(confirmada, "A013", 30) == []
+assert analisis_de(confirmada, "A013")["resultado"] == 30
+assert analisis_de(confirmada, "A013")["fuera_especificacion"] is False
+
+# Registrar un resultado fuera de especificación
+assert registrar_resultado(confirmada, "A012", 500) == []
+assert analisis_de(confirmada, "A012")["resultado"] == 500
+assert analisis_de(confirmada, "A012")["fuera_especificacion"] is True
+
+# Corregir un resultado: el fuera de especificación se recalcula
+assert registrar_resultado(confirmada, "A012", 50) == []
+assert analisis_de(confirmada, "A012")["fuera_especificacion"] is False
+
+# Código que no pertenece a la muestra
+assert len(registrar_resultado(confirmada, "A019", 10)) == 1
+
+# Resultado negativo: no se modifica el valor anterior
+assert len(registrar_resultado(confirmada, "A013", -5)) == 1
+assert analisis_de(confirmada, "A013")["resultado"] == 30
+
+# Varios errores a la vez: negativo y código inexistente
+assert len(registrar_resultado(confirmada, "A019", -5)) == 2
+
+# Muestra enviada: aún no se pueden registrar resultados
+assert len(registrar_resultado(enviada, "A012", 10)) == 1
+assert analisis_de(enviada, "A012")["resultado"] is None
+
+# Muestra liberada: los resultados están bloqueados
+assert len(registrar_resultado(liberada, "A019", 5)) == 1
+assert analisis_de(liberada, "A019")["resultado"] == 0
+print("registrar_resultado: todas las pruebas pasaron")
