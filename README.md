@@ -20,7 +20,9 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
     - Nombre (copiados del catalogo)
     - Norma  (copiados del catalogo)
     - Unidad  
-    - Limite  
+    - Limite
+    - Resultado
+    - Fuera de especificacion
 
 ## Funcionalidades
 
@@ -29,7 +31,7 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 - Asignación de análisis para cada muestra desde catalogo. (Implementado)  
 - Registro de día de inicio de análisis. (Pendiente)
 - Registro del analista encargado del análisis. (Pendiente)
-- Registro de resultado por análisis de muestra. (Pendiente)
+- Registro de resultado por análisis de muestra. (Logica implementada, pendiente menu)
 - Definición de fecha límite para reporte. (Pendiente)
 - Busqueda de muestras por ID. (Pendiente)
 - Despliegue de análisis y resultados de muestra. (Pendiente)

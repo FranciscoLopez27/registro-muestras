@@ -10,7 +10,7 @@ En caso de que el usuario no ingrese nada o solo espacios vacios, la funcion dev
 ## Resultado de cada análisis
 El resultado de cada analisis se guarda como una clave en el diccionario respectivo, en la lista de analisis de cada muestra como "resultado". Al momento de la creacion de la muestra, este valor se asigna como None por defecto y cuando los resultados estan listos se modifica, Esta decision de dejar None y no utilizar algun valor numerico como 0, se define para evitar problemas por mala interpretacion o calculos al poder ser un valor que tomaria un resultado real cuando no se tiene conteo.
 Ejemplo:
-{"codigo": "A012", "nombre": "...", "norma": "...", "unidad": "UFC/g", "limite": 100, "resultado": ..., "comentario": ...}
+{"codigo": "A012", "nombre": "...", "norma": "...", "unidad": "UFC/g", "limite": 100, "resultado": ..., "fuera_especificacion": ...}
 
 
 ## Cuando se pueden registrar los resultados
@@ -19,7 +19,7 @@ Mientras las muestras se encuentre en estado de "confirmada", los resultados no 
 Posterior a liberar la muestra los resultados quedan bloqueados, y no deberia ser posible modificar los resultados.
 
 ## Fuera de norma
-Al momento de agregar un resultado a algun analisis de una muestra, el sistema realiza una comparación de este valor con el limite asignado al momento de crear la muestra. En caso de superar dicho limite, el sistema automaticamente cambia el valor de la clave "comentario_especificación" a "Fuera de especificación, para que sea visible al cliente en el reporte final cuando la muestra es liberada. Si se realiza una modificación en el resultado, el sistema nuevamente recalcula y para ver si corresponde a asignar Fuera de especificación o volver a definir None si se encuentra dentro.
+Al momento de agregar un resultado a algun analisis de una muestra, el sistema realiza una comparación de este valor con el limite asignado al momento de crear la muestra, modificando automaticamente el valor de la clave "fuera_especificacion" dependiendo del caso. Esta clave , tiene 3 posibles valores: None cuando es asociado el analisis a la muestra y todavia no hay resultado asociado; False al momento de registrar un resultado y que este sea menor al limite de conteo; True cuando el resultado ingresado supera al limite estipulado. Esta clave es modificada para que sea visible al cliente en el reporte final cuando la muestra es liberada, y disponga de la informacion necesaria. Si se realiza una modificación en el resultado, el sistema nuevamente recalcula y para ver si corresponde a asignar Fuera de especificación o volver a definir None si se encuentra dentro.
 
 ## Cambio de estado
 Las muestras pueden tener cuatro estados posibles, que son enviadas, confirmadas, liberadas y canceladas.
