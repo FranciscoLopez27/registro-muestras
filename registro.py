@@ -19,6 +19,12 @@ ESTADOS_POSIBLES = ("enviada","confirmada","liberada")
 
 ESTADOS_CANCELABLES = ("enviada", "confirmada")
 
+TEXTOS_EN_BASE_A_RESULTADOS = {None: "|| Especificación: pendiente", 
+                            True: "|| Especificación: fuera",
+                            False: "|| Especificación: dentro"
+                            }
+
+
 def muestras_de_ejemplo():
     """Devuelve una lista de muestras de ejemplo para probar el programa."""
     return [
@@ -140,7 +146,9 @@ def listar_muestras(lista_muestras):
             print("Analisis asociados a la muestra: ")
             for analisis in muestra["analisis"]:
                 print(f"\nNombre analisis: {analisis['nombre']} || Codigo: {analisis['codigo']} || Norma: {analisis['norma']} || "
-                      f"Limite conteo: {analisis['limite']} || Unidad: {analisis['unidad']}")
+                    f"Limite conteo: {analisis['limite']} || Unidad: {analisis['unidad']}")
+                texto_resultado = "no registrado" if analisis["resultado"] is None else analisis["resultado"]
+                print(f"\nResultado: {texto_resultado} {TEXTOS_EN_BASE_A_RESULTADOS[analisis['fuera_especificacion']]}")
             print("")
             print("-------------------O--------------------")
     return
@@ -239,14 +247,8 @@ def pedir_analisis_catalogo(lista_analisis_agregados):
     norma_analisis = datos_analisis["norma"]
     lista_unidad_analisis = datos_analisis["unidades"]
     unidad_seleccionada = elegir_unidad(lista_unidad_analisis)
-    while True:
-        limite_conteo = input("Ingrese el limite de conteo para el análisis: \n").strip()
-        if limite_conteo.isdigit():
-            limite_conteo = int(limite_conteo)
-            break
-        else:
-            print("\nError: Limite de conteo debe ser un numero entero mayor o igual a 0")
-            print("Ingresar nuevamente\n")
+    limite_conteo = pedir_entero("Ingrese el limite de conteo para el análisis: \n")
+    
     analisis_final = {
         "codigo": codigo_del_analisis,
         "nombre": nombre_analisis,
@@ -270,7 +272,6 @@ def siguiente_estado(estado_actual):
     if indice == len(ESTADOS_POSIBLES)-1:
         return None
     return ESTADOS_POSIBLES[indice+1]
-    
 
 def tiene_resultado_pendiente(muestra):
     return any(analisis["resultado"] is None for analisis in muestra["analisis"])
@@ -332,8 +333,13 @@ def registrar_resultado(muestra, codigo_analisis, resultado):
     analisis_buscado["fuera_especificacion"] = esta_fuera_de_especificacion(analisis_buscado)
     return lista_errores
     
-    
-
+def pedir_entero(mensaje):
+    while True:
+        valor_entero = input(mensaje).strip()
+        if valor_entero.isdigit():
+            return int(valor_entero)
+        print("\nError: Valor ingresado debe ser un numero entero mayor o igual a 0")
+        print("Ingresar nuevamente\n")
 
 def mostrar_menu():
     print("\n--------   Registro de muestras   --------")
@@ -341,7 +347,8 @@ def mostrar_menu():
     print("2. Listar muestras")
     print("3. Buscar muestra")
     print("4. Cambiar estado de muestra")
-    print("5. Salir\n")
+    print("5. Registrar resultado")
+    print("6. Salir\n")
 
 def opcion_agregar_muestra(lista_muestras):
     id_nuevo, errores = agregar_muestra(lista_muestras,pedir_datos_muestra())
@@ -402,6 +409,33 @@ def opcion_cambiar_estado(lista_muestras):
         print("Opcion ingresada no valida, volviendo al menu")
     pausar()
 
+def opcion_registrar_resultado(lista_muestras):
+    muestra_encontrada = pedir_muestra_existente(lista_muestras, "Digite el ID de la muestra que quiere ingresar resultado: \n")
+    if muestra_encontrada is None:
+        return
+    if muestra_encontrada["estado"] != "confirmada":
+        print(f"Para reportar resultados la muestra debe estar en estado confirmada y se encuentra en estado: {muestra_encontrada["estado"]}")
+        print("Favor modificar estado antes de reportar resultados")
+        print("Si no es posible modificar estado, contactar con jefatura o cliente")
+        pausar()
+        return
+    analisis_muestra = {analisis["codigo"]: analisis for analisis in muestra_encontrada["analisis"]}
+    codigo_elegido = elegir_codigo(analisis_muestra, "Seleccione un codigo de los siguientes analisis de la muestra")
+    resultado_ingresado = pedir_entero("Ingresar el valor del resultado del analisis:\n")
+    errores = registrar_resultado(muestra_encontrada, codigo_elegido, resultado_ingresado)
+    if len(errores) != 0:
+        mostrar_errores("El resultado no ha podido ser registrado", errores)
+
+    else:
+        print(f"El resultado {resultado_ingresado} ha sido ingresado correctamente en el análisis {codigo_elegido}")
+        if analisis_muestra[codigo_elegido]["fuera_especificacion"]:
+            print(f"El resultado quedo fuera de especificación")       
+        else:
+            print(f"El resultado quedo dentro de especificación")
+    pausar()
+    return
+
+
 def main():
     lista_muestras = muestras_de_ejemplo()
 
@@ -409,7 +443,8 @@ def main():
         "1": opcion_agregar_muestra,
         "2": opcion_listar_muestras,
         "3": opcion_buscar_muestra,
-        "4": opcion_cambiar_estado
+        "4": opcion_cambiar_estado,
+        "5": opcion_registrar_resultado
     }
 
     while True:
@@ -418,7 +453,7 @@ def main():
         if opcion in comandos:
             comandos[opcion](lista_muestras)
                 
-        elif opcion == "5":
+        elif opcion == "6":
             print("\nAdios...")
             pausar()
             break
