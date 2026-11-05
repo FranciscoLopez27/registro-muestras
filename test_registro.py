@@ -3,7 +3,8 @@ from registro import (
     generar_id, validar_muestra, agregar_muestra, listar_muestras,
     normalizar_codigo, unidad_desde_opcion, CATALOGO_CLIENTES, CATALOGO_ANALISIS, codigo_ya_agregado,
     ESTADOS_POSIBLES, buscar_muestra, siguiente_estado, tiene_resultado_pendiente, muestras_de_ejemplo,
-    avanzar_estado, cancelar_muestra, esta_fuera_de_especificacion, registrar_resultado
+    avanzar_estado, cancelar_muestra, esta_fuera_de_especificacion, registrar_resultado, muestras_fuera_norma,
+    agrupar_por_estado
 )
 
 analisis_ok = [
@@ -258,3 +259,51 @@ assert analisis_de(enviada, "A012")["resultado"] is None
 assert len(registrar_resultado(liberada, "A019", 5)) == 1
 assert analisis_de(liberada, "A019")["resultado"] == 0
 print("registrar_resultado: todas las pruebas pasaron")
+
+# ---------- muestras_fuera_norma ----------
+def muestra_con(id_muestra, estado, analisis):
+    return {"id": id_muestra, "cliente": "0042", "descripcion": "Prueba",
+            "estado": estado, "fecha_ingreso": "2026-11-05", "analisis": analisis}
+
+def ids(muestras):
+    return [muestra["id"] for muestra in muestras]
+
+# Con las muestras de ejemplo, solo M-0002 tiene un resultado fuera (250 con límite 100)
+assert ids(muestras_fuera_norma(muestras_de_ejemplo())) == ["M-0002"]
+
+# Se incluyen sin importar el estado, incluidas liberadas y canceladas
+liberada_fuera = muestra_con("M-0101", "liberada", [analisis_con(500)])
+cancelada_fuera = muestra_con("M-0102", "cancelada", [analisis_con(500)])
+dentro = muestra_con("M-0103", "confirmada", [analisis_con(50)])
+assert ids(muestras_fuera_norma([liberada_fuera, dentro, cancelada_fuera])) == ["M-0101", "M-0102"]
+
+# Dos análisis fuera de especificación: la muestra aparece una sola vez
+doble_fuera = muestra_con("M-0104", "confirmada", [analisis_con(500), analisis_con(300)])
+assert ids(muestras_fuera_norma([doble_fuera])) == ["M-0104"]
+
+# Sin resultado no cuenta como fuera de norma
+pendiente = muestra_con("M-0105", "confirmada", [analisis_con(None)])
+assert muestras_fuera_norma([pendiente]) == []
+
+# Lista vacía
+assert muestras_fuera_norma([]) == []
+print("muestras_fuera_norma: todas las pruebas pasaron")
+
+# ---------- agrupar_por_estado ----------
+ejemplos = muestras_de_ejemplo()
+grupos = agrupar_por_estado(ejemplos)
+assert list(grupos) == ["enviada", "confirmada", "liberada", "cancelada"]
+assert ids(grupos["confirmada"]) == ["M-0002"]
+
+# El orden de los grupos no depende del orden de la lista
+grupos_invertidos = agrupar_por_estado(list(reversed(ejemplos)))
+assert list(grupos_invertidos) == ["enviada", "confirmada", "liberada", "cancelada"]
+
+# Los estados sin muestras no aparecen
+solo_liberadas = [muestra_con("M-0201", "liberada", []), muestra_con("M-0202", "liberada", [])]
+assert list(agrupar_por_estado(solo_liberadas)) == ["liberada"]
+assert ids(agrupar_por_estado(solo_liberadas)["liberada"]) == ["M-0201", "M-0202"]
+
+# Lista vacía
+assert agrupar_por_estado([]) == {}
+print("agrupar_por_estado: todas las pruebas pasaron")

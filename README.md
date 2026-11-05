@@ -35,7 +35,7 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 - Registro de resultado por análisis de muestra. (Implementado)
 - Cálculo automático de fuera de especificación. (Implementado)
 - Despliegue de análisis y resultados de muestra. (Implementado)
-- Listado de muestras fuera de norma. (Pendiente)
+- Listado de muestras fuera de norma. (Implementado)
 - Registro de día de inicio de análisis. (Pendiente)
 - Registro del analista encargado del análisis. (Pendiente)
 - Definición de fecha límite para reporte. (Pendiente)

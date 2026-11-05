@@ -12,7 +12,6 @@ El resultado de cada analisis se guarda como una clave en el diccionario respect
 Ejemplo:
 {"codigo": "A012", "nombre": "...", "norma": "...", "unidad": "UFC/g", "limite": 100, "resultado": ..., "fuera_especificacion": ...}
 
-
 ## Cuando se pueden registrar los resultados
 Los resultados es posible ingresarlos, en el momento que la muestra se encuentra en estado de "confirmada" por el laboratorio, que significa que se encuentra actualmente en proceso de analisis y reporte de resultados. 
 Mientras las muestras se encuentre en estado de "confirmada", los resultados no seran enviado o seran visibles para los clientes, ademas de poder modificar los resultados para corrección.
@@ -28,6 +27,10 @@ Las muestras pueden tener cuatro estados posibles, que son enviadas, confirmadas
 - Liberada: Las muestras ya tienen todos los resultados y fueron revisados para verificar que estuvieran correctamente cargadas, liberando los resultados para que sea visible al cliente o se pueda emitir el informe con todos los resultados. Si algun resultado se encuentra en None no es posible liberar la muestra.
 - Canceladas: Los clientes pueden solicitar cancelar determinada muestra, por distintos motivos. No se continuan o empiezan los analisis que estuvieran asociadas a esa muestra. Para modificar a este estatus debe ser previamente conversado y solicitado con jefatura.
 La trancision es lineal desde enviada luego a confirmada y finalmente a liberada, no siendo posible devolver a un estado anterior, manteniendo congruencia en el flujo de trabajo. Desde el estado de enviada y confirmada, puede modificarse a cancelada, pero una muestra liberada no puede ser cancelada ya que se completaron todos los analisis.
+
+## Listar muestras que se encuentran fuera de norma
+Se pueden listar las muestras que tengan resultado, y a su vez cumplan con la condicion de que supere el limite establecido, estando "fuera de especificacion", lo que se ve reflejado en la clave fuera_especificacion como un True. Se muestran todas las muestras en sistema que tengan a lo menos un analisis que cumplan la condición de especificación, sin importar el estado en que se encuentren (esto por temas de trazabilidad). Se agrupan en base al estado en que se encuentran en el sistema, teniendo el siguiente flujo confirmada->liberada->cancelada, y listada para una facil trazabilidad. En caso de que algun estado no tenga ninguna muestra fuera de especificación, no se muestra.
+Al listar se muestra toda la información de la muestra, incluido todos los analisis. Esto es asi, principalmente para que el analista o encargado de laboratorio pueda analizar la situacion de las muestras fuera de especificación en su totalidad, para tener criterio si es necesario contactar al cliente para informar o realizare repeticiones de analisis debido a indicios extraños en los resultados.
 
 ## Pseudocódigo
 

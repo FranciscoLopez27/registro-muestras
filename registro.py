@@ -19,6 +19,8 @@ ESTADOS_POSIBLES = ("enviada","confirmada","liberada")
 
 ESTADOS_CANCELABLES = ("enviada", "confirmada")
 
+ESTADOS_EN_ORDEN = ESTADOS_POSIBLES + ("cancelada",)
+
 TEXTOS_EN_BASE_A_RESULTADOS = {None: "|| Especificación: pendiente", 
                             True: "|| Especificación: fuera",
                             False: "|| Especificación: dentro"
@@ -33,9 +35,9 @@ def muestras_de_ejemplo():
             "estado": "enviada", "fecha_ingreso": "2026-10-27",
             "analisis": [
                 {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
-                 "unidad": "UFC/ml", "limite": 10, "resultado": None, "fuera_especificacion": None},
+                "unidad": "UFC/ml", "limite": 10, "resultado": None, "fuera_especificacion": None},
                 {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
-                 "unidad": "UFC/ml", "limite": 100, "resultado": None, "fuera_especificacion": None},
+                "unidad": "UFC/ml", "limite": 100, "resultado": None, "fuera_especificacion": None},
             ],
         },
         {
@@ -43,9 +45,9 @@ def muestras_de_ejemplo():
             "estado": "confirmada", "fecha_ingreso": "2026-10-27",
             "analisis": [
                 {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
-                 "unidad": "UFC/g", "limite": 100, "resultado": 250, "fuera_especificacion": True},
+                "unidad": "UFC/g", "limite": 100, "resultado": 250, "fuera_especificacion": True},
                 {"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832",
-                 "unidad": "UFC/ml", "limite": 50, "resultado": None, "fuera_especificacion": None},
+                "unidad": "UFC/ml", "limite": 50, "resultado": None, "fuera_especificacion": None},
             ],
         },
         {
@@ -53,7 +55,7 @@ def muestras_de_ejemplo():
             "estado": "liberada", "fecha_ingreso": "2026-10-26",
             "analisis": [
                 {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
-                 "unidad": "UFC/g", "limite": 1000, "resultado": 0, "fuera_especificacion": False},
+                "unidad": "UFC/g", "limite": 1000, "resultado": 0, "fuera_especificacion": False},
             ],
         },
         {
@@ -61,7 +63,50 @@ def muestras_de_ejemplo():
             "estado": "cancelada", "fecha_ingreso": "2026-10-28",
             "analisis": [
                 {"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832",
-                 "unidad": "UFC/ml", "limite": 10, "resultado": None, "fuera_especificacion": None},
+                "unidad": "UFC/ml", "limite": 10, "resultado": None, "fuera_especificacion": None},
+            ],
+        },
+    ]
+
+def muestras_de_ejemplo_ampliadas():
+    """Devuelve más muestras de ejemplo, con varias fuera de especificación, para probar a mano."""
+    return muestras_de_ejemplo() + [
+        {
+            "id": "M-0005", "cliente": "0047", "descripcion": "Queso fresco lote 7",
+            "estado": "confirmada", "fecha_ingreso": "2026-11-02",
+            "analisis": [
+                {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
+                "unidad": "UFC/g", "limite": 100, "resultado": 80, "fuera_especificacion": False},
+                {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
+                "unidad": "UFC/g", "limite": 1000, "resultado": 1500, "fuera_especificacion": True},
+            ],
+        },
+        {
+            "id": "M-0006", "cliente": "0044", "descripcion": "Hamburguesa de vacuno lote 3",
+            "estado": "liberada", "fecha_ingreso": "2026-10-30",
+            "analisis": [
+                {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
+                "unidad": "UFC/g", "limite": 100, "resultado": 400, "fuera_especificacion": True},
+                {"codigo": "A013", "nombre": "Conteo Coliformes", "norma": "ISO 4832",
+                "unidad": "UFC/ml", "limite": 50, "resultado": 120, "fuera_especificacion": True},
+            ],
+        },
+        {
+            "id": "M-0007", "cliente": "0042", "descripcion": "Yogur natural lote 21",
+            "estado": "liberada", "fecha_ingreso": "2026-10-29",
+            "analisis": [
+                {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
+                "unidad": "UFC/g", "limite": 100, "resultado": 30, "fuera_especificacion": False},
+                {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
+                "unidad": "UFC/g", "limite": 1000, "resultado": 200, "fuera_especificacion": False},
+            ],
+        },
+        {
+            "id": "M-0008", "cliente": "0047", "descripcion": "Frutillas congeladas lote 9",
+            "estado": "cancelada", "fecha_ingreso": "2026-11-01",
+            "analisis": [
+                {"codigo": "A019", "nombre": "Conteo Mohos y levaduras", "norma": "ISO 21527-2",
+                "unidad": "UFC/g", "limite": 1000, "resultado": 5000, "fuera_especificacion": True},
             ],
         },
     ]
@@ -145,7 +190,7 @@ def listar_muestras(lista_muestras):
                 )
             print("Analisis asociados a la muestra: ")
             for analisis in muestra["analisis"]:
-                print(f"\nNombre analisis: {analisis['nombre']} || Codigo: {analisis['codigo']} || Norma: {analisis['norma']} || "
+                print(f"\n--> Nombre analisis: {analisis['nombre']} || Codigo: {analisis['codigo']} || Norma: {analisis['norma']} || "
                     f"Limite conteo: {analisis['limite']} || Unidad: {analisis['unidad']}")
                 texto_resultado = "no registrado" if analisis["resultado"] is None else analisis["resultado"]
                 print(f"\nResultado: {texto_resultado} {TEXTOS_EN_BASE_A_RESULTADOS[analisis['fuera_especificacion']]}")
@@ -341,6 +386,18 @@ def pedir_entero(mensaje):
         print("\nError: Valor ingresado debe ser un numero entero mayor o igual a 0")
         print("Ingresar nuevamente\n")
 
+def muestras_fuera_norma(lista_muestras):
+    return [muestra for muestra in lista_muestras 
+            if any(esta_fuera_de_especificacion(analisis) for analisis in muestra["analisis"])
+    ]
+
+def agrupar_por_estado(lista_muestras):
+    por_estado = {}
+    for muestra in lista_muestras:
+        por_estado.setdefault(muestra["estado"], []).append(muestra)
+    ordenado = {estado: por_estado[estado] for estado in ESTADOS_EN_ORDEN if estado in por_estado}
+    return ordenado
+
 def mostrar_menu():
     print("\n--------   Registro de muestras   --------")
     print("1. Agregar muestra")
@@ -348,7 +405,8 @@ def mostrar_menu():
     print("3. Buscar muestra")
     print("4. Cambiar estado de muestra")
     print("5. Registrar resultado")
-    print("6. Salir\n")
+    print("6. Listar muestras fuera de especificación")
+    print("7. Salir\n")
 
 def opcion_agregar_muestra(lista_muestras):
     id_nuevo, errores = agregar_muestra(lista_muestras,pedir_datos_muestra())
@@ -435,16 +493,29 @@ def opcion_registrar_resultado(lista_muestras):
     pausar()
     return
 
+def opcion_listar_fuera_de_norma(lista_muestras):
+    muestras_fuera_especificacion = muestras_fuera_norma(lista_muestras)
+    if len(muestras_fuera_especificacion) == 0:
+        print("No se tiene ninguna muestra fuera de especificación en la base de datos")
+        pausar()
+        return
+    for estado, muestras in agrupar_por_estado(muestras_fuera_especificacion).items():
+        print(f"Muestras fuera de especificación en estado: {estado}")
+        print("-------------------O--------------------")
+        listar_muestras(muestras)
+    pausar()
+
 
 def main():
-    lista_muestras = muestras_de_ejemplo()
+    lista_muestras = muestras_de_ejemplo_ampliadas()
 
     comandos = {
         "1": opcion_agregar_muestra,
         "2": opcion_listar_muestras,
         "3": opcion_buscar_muestra,
         "4": opcion_cambiar_estado,
-        "5": opcion_registrar_resultado
+        "5": opcion_registrar_resultado,
+        "6": opcion_listar_fuera_de_norma
     }
 
     while True:
@@ -453,7 +524,7 @@ def main():
         if opcion in comandos:
             comandos[opcion](lista_muestras)
                 
-        elif opcion == "6":
+        elif opcion == "7":
             print("\nAdios...")
             pausar()
             break
