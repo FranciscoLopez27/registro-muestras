@@ -1,9 +1,7 @@
 from formatters import (pausar)
-
 from lab_rules import(
     normalizar_codigo, unidad_desde_opcion, codigo_ya_agregado, buscar_muestra
 )
-
 from constants import (CATALOGO_CLIENTES, CATALOGO_ANALISIS,)
 
 

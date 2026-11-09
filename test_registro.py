@@ -1,11 +1,25 @@
 from datetime import date
 from registro import (
-    generar_id, validar_muestra, agregar_muestra, listar_muestras,
-    normalizar_codigo, unidad_desde_opcion, CATALOGO_CLIENTES, CATALOGO_ANALISIS, codigo_ya_agregado,
-    ESTADOS_POSIBLES, buscar_muestra, siguiente_estado, tiene_resultado_pendiente, muestras_de_ejemplo,
-    avanzar_estado, cancelar_muestra, esta_fuera_de_especificacion, registrar_resultado, muestras_fuera_norma,
+    agregar_muestra, listar_muestras,
+    normalizar_codigo, unidad_desde_opcion,  codigo_ya_agregado,
+    buscar_muestra,  muestras_de_ejemplo,
+    avanzar_estado, cancelar_muestra,  registrar_resultado, muestras_fuera_norma,
     agrupar_por_estado
 )
+from lab_rules import(
+    generar_id, validar_muestra, siguiente_estado, tiene_resultado_pendiente,
+    esta_fuera_de_especificacion,
+)
+
+from constants import(
+    CATALOGO_CLIENTES, CATALOGO_ANALISIS, ESTADOS_POSIBLES
+)
+
+from sample_data import(
+    muestras_de_ejemplo, muestras_de_ejemplo_ampliadas
+)
+
+from formatters import listar_muestras
 
 analisis_ok = [
     {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2", "unidad": "UFC/g", "limite": 100},
