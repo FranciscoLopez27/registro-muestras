@@ -1,24 +1,14 @@
 from datetime import date
-from registro import (
-    agregar_muestra, listar_muestras,
-    normalizar_codigo, unidad_desde_opcion,  codigo_ya_agregado,
-    buscar_muestra,  muestras_de_ejemplo,
-    avanzar_estado, cancelar_muestra,  registrar_resultado, muestras_fuera_norma,
-    agrupar_por_estado
-)
 from lab_rules import(
     generar_id, validar_muestra, siguiente_estado, tiene_resultado_pendiente,
-    esta_fuera_de_especificacion,
+    esta_fuera_de_especificacion, normalizar_codigo, unidad_desde_opcion,
+    codigo_ya_agregado, buscar_muestra, avanzar_estado, cancelar_muestra,
+    registrar_resultado, muestras_fuera_norma, agrupar_por_estado,
 )
+from controllers import(agregar_muestra)
+from constants import(CATALOGO_CLIENTES, CATALOGO_ANALISIS,)
 
-from constants import(
-    CATALOGO_CLIENTES, CATALOGO_ANALISIS, ESTADOS_POSIBLES
-)
-
-from sample_data import(
-    muestras_de_ejemplo, muestras_de_ejemplo_ampliadas
-)
-
+from sample_data import(muestras_de_ejemplo)
 from formatters import listar_muestras
 
 analisis_ok = [

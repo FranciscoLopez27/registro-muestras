@@ -1,4 +1,4 @@
-from sample_data import(muestras_de_ejemplo_ampliadas)
+from sample_data import muestras_de_ejemplo_ampliadas
 from formatters import (mostrar_menu, pausar)
 from controllers import(
     opcion_agregar_muestra, opcion_listar_muestras, opcion_buscar_muestra,

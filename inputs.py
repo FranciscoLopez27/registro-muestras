@@ -4,8 +4,6 @@ from lab_rules import(
 )
 from constants import (CATALOGO_CLIENTES, CATALOGO_ANALISIS,)
 
-
-
 def pedir_entero(mensaje):
     while True:
         valor_entero = input(mensaje).strip()
