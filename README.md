@@ -84,7 +84,7 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 
 Ejecutar el programa:
 
-    py registro.py
+    py main.py
 
 Ejecutar las pruebas:
 
