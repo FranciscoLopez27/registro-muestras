@@ -79,6 +79,23 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 - Aceptar códigos de cliente sin los ceros a la izquierda.
 - Cambio de estado en lote para varias muestras a la vez.
 
+## Estructura del proyecto
+
+| Archivo | Contenido |
+|---|---|
+| `main.py` | Punto de entrada: muestra el menú y dirige cada opción a su controlador. |
+| `controllers.py` | Coordina cada opción del menú: agregar, listar, buscar, cambiar estado, registrar resultados y listar fuera de norma. |
+| `inputs.py` | Pide datos al usuario: selección desde catálogos, unidades, números y búsqueda de muestras. |
+| `formatters.py` | Muestra la información en pantalla: listados, errores, menú y pausas. |
+| `lab_rules.py` | Reglas del laboratorio: validación, registro de muestras y resultados, cambios de estado y cálculo de fuera de especificación. No interactúa con el usuario. |
+| `constants.py` | Datos fijos: catálogos de clientes y análisis, y estados de las muestras. |
+| `sample_data.py` | Muestras de ejemplo para pruebas. |
+| `test_registro.py` | Pruebas automáticas de las reglas del laboratorio. |
+
+Las reglas del laboratorio no dependen de la interacción ni de la presentación,
+por lo que podrían reutilizarse con otra interfaz, por ejemplo una web.
+El detalle de esta organización está en
+[docs/organizacion_modulos.md](docs/organizacion_modulos.md).
 
 ## Cómo usar
 
