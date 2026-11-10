@@ -12,6 +12,18 @@ def pedir_entero(mensaje):
         print("\nError: Valor ingresado debe ser un numero entero mayor o igual a 0")
         print("Ingresar nuevamente\n")
 
+def pedir_si_no(mensaje):
+    """Pide una respuesa S o N al usuario y repite hasta obtener una respuesta correcta
+    Devuelve True si es caso S, y False si la respuesta es N"""
+    while True:
+        opcion_usuario = input(f"{mensaje} (s/n): \n").strip().lower()
+        if opcion_usuario == "s":
+            return True
+        elif opcion_usuario == "n":
+            return False
+        else:
+            print("\nOpcion ingresada invalida, opciones posibles: S | N")
+
 def pedir_muestra_existente(lista_muestras, mensaje):
     id_muestra=input(mensaje)
     resultado_encontrado = buscar_muestra(lista_muestras, id_muestra)
@@ -89,14 +101,10 @@ def pedir_analisis():
         if len(lista_analisis) == len(CATALOGO_ANALISIS):
             print("\nTodos los analisis del catalogo han sido registrados para la muestra")
             return lista_analisis
-        opcion_usuario = input("¿Agregar otro análisis? (s/n): \n").strip().lower()
-        if opcion_usuario == "s":
-            datos_analisis = pedir_analisis_catalogo(lista_analisis)
-            lista_analisis.append(datos_analisis)
-        elif opcion_usuario == "n":
+        if not pedir_si_no("¿Agregar otro análisis?"):
             break
-        else:
-            print("\nOpcion ingresada invalida, opciones posibles: S | N")
+        datos_analisis = pedir_analisis_catalogo(lista_analisis)
+        lista_analisis.append(datos_analisis)
     return lista_analisis
 
 def pedir_datos_muestra():
