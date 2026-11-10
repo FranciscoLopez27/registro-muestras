@@ -89,14 +89,10 @@ def pedir_analisis():
         if len(lista_analisis) == len(CATALOGO_ANALISIS):
             print("\nTodos los analisis del catalogo han sido registrados para la muestra")
             return lista_analisis
-        opcion_usuario = input("¿Agregar otro análisis? (s/n): \n").strip().lower()
-        if opcion_usuario == "s":
-            datos_analisis = pedir_analisis_catalogo(lista_analisis)
-            lista_analisis.append(datos_analisis)
-        elif opcion_usuario == "n":
+        if not pedir_si_no("¿Agregar otro análisis?"):
             break
-        else:
-            print("\nOpcion ingresada invalida, opciones posibles: S | N")
+        datos_analisis = pedir_analisis_catalogo(lista_analisis)
+        lista_analisis.append(datos_analisis)
     return lista_analisis
 
 def pedir_datos_muestra():
@@ -109,3 +105,13 @@ def pedir_datos_muestra():
         "analisis": analisis_muestra
     }
     return datos_muestra
+
+def pedir_si_no(mensaje):
+    while True:
+        opcion_usuario = input(f"{mensaje} (s/n): \n").strip().lower()
+        if opcion_usuario == "s":
+            return True
+        elif opcion_usuario == "n":
+            return False
+        else:
+            print("\nOpcion ingresada invalida, opciones posibles: S | N")

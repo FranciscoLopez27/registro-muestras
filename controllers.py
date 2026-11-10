@@ -7,7 +7,7 @@ from formatters import (
 )
 from inputs import(
     pedir_datos_muestra, pedir_muestra_existente, 
-    elegir_codigo, pedir_entero 
+    elegir_codigo, pedir_entero, pedir_si_no
 )
 
 def opcion_agregar_muestra(lista_muestras):
@@ -50,17 +50,15 @@ def opcion_cambiar_estado(lista_muestras):
 
     elif opcion_estado == "2":
         print(f"¿Está seguro de que desea cancelar la muestra {muestra_encontrada['id']}?")
-        confirmacion=input("Esta acción no se puede deshacer y debe estar autorizada por jefatura. (s/n): ").strip().lower()
-        if confirmacion == "s":
+        confirmacion=pedir_si_no("Esta acción no se puede deshacer y debe estar autorizada por jefatura.")
+        if confirmacion:
             lista_errores = cancelar_muestra(muestra_encontrada)
             if len(lista_errores) != 0:
                 mostrar_errores("No se ha podido modificar el estado", lista_errores)
             else:
                 print("La muestra ha sido cancelada correctamente")
-        elif confirmacion == "n":
-            print("No se continua el procedimiento de cancelación de la muestra")
         else:
-            print("Opción no valida, volviendo al menu principal")
+            print("No se continua el procedimiento de cancelación de la muestra")
     
     elif opcion_estado == "3":
         print("Volviendo al menu principal")
