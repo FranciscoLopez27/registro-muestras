@@ -12,6 +12,18 @@ def pedir_entero(mensaje):
         print("\nError: Valor ingresado debe ser un numero entero mayor o igual a 0")
         print("Ingresar nuevamente\n")
 
+def pedir_si_no(mensaje):
+    """Pide una respuesa S o N al usuario y repite hasta obtener una respuesta correcta
+    Devuelve True si es caso S, y False si la respuesta es N"""
+    while True:
+        opcion_usuario = input(f"{mensaje} (s/n): \n").strip().lower()
+        if opcion_usuario == "s":
+            return True
+        elif opcion_usuario == "n":
+            return False
+        else:
+            print("\nOpcion ingresada invalida, opciones posibles: S | N")
+
 def pedir_muestra_existente(lista_muestras, mensaje):
     id_muestra=input(mensaje)
     resultado_encontrado = buscar_muestra(lista_muestras, id_muestra)
@@ -105,13 +117,3 @@ def pedir_datos_muestra():
         "analisis": analisis_muestra
     }
     return datos_muestra
-
-def pedir_si_no(mensaje):
-    while True:
-        opcion_usuario = input(f"{mensaje} (s/n): \n").strip().lower()
-        if opcion_usuario == "s":
-            return True
-        elif opcion_usuario == "n":
-            return False
-        else:
-            print("\nOpcion ingresada invalida, opciones posibles: S | N")

@@ -50,8 +50,7 @@ def opcion_cambiar_estado(lista_muestras):
 
     elif opcion_estado == "2":
         print(f"¿Está seguro de que desea cancelar la muestra {muestra_encontrada['id']}?")
-        confirmacion=pedir_si_no("Esta acción no se puede deshacer y debe estar autorizada por jefatura.")
-        if confirmacion:
+        if pedir_si_no("Esta acción no se puede deshacer y debe estar autorizada por jefatura."):
             lista_errores = cancelar_muestra(muestra_encontrada)
             if len(lista_errores) != 0:
                 mostrar_errores("No se ha podido modificar el estado", lista_errores)
