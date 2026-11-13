@@ -1,3 +1,5 @@
+from datetime import date
+
 class Analisis:
     """Un análisis solicitado para una muestra, con una copia de los datos
     vigentes del catálogo al momento del registro."""
@@ -46,4 +48,31 @@ class Analisis:
         if len(lista_errores) != 0:
             return lista_errores
         self._resultado = valor
+        return lista_errores
+
+class Muestra:
+    def __init__(self, id_muestra, cliente, descripcion, fecha_ingreso=None):
+        self.id_muestra = id_muestra
+        self.cliente = cliente
+        self.descripcion = descripcion
+        if fecha_ingreso is None:
+            fecha_ingreso = date.today().isoformat()
+        self.fecha_ingreso = fecha_ingreso
+        self._estado = "enviada"
+        self._analisis = []
+
+    @property
+    def estado(self):
+        return self._estado
+    
+    @property
+    def analisis(self):
+        return tuple(self._analisis)
+
+    def agregar_analisis(self, analisis):
+        lista_errores = []
+        if any(analisis.codigo == analisis_registrado.codigo for analisis_registrado in self._analisis):
+            lista_errores.append("No pueden haber analisis repetidos para una muestra")
+            return lista_errores
+        self._analisis.append(analisis)
         return lista_errores
