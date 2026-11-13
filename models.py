@@ -1,4 +1,5 @@
 from datetime import date
+from constants import (ESTADOS_POSIBLES, ESTADOS_CANCELABLES)
 
 class Analisis:
     """Un análisis solicitado para una muestra, con una copia de los datos
@@ -75,4 +76,40 @@ class Muestra:
             lista_errores.append("No pueden haber analisis repetidos para una muestra")
             return lista_errores
         self._analisis.append(analisis)
+        return lista_errores
+
+    def _siguiente_estado(self):
+        if self._estado not in ESTADOS_POSIBLES:
+            return None
+        indice = ESTADOS_POSIBLES.index(self._estado)
+        if indice == len(ESTADOS_POSIBLES)-1:
+            return None
+        return ESTADOS_POSIBLES[indice + 1]
+
+    def tiene_resultados_pendientes(self):
+        return any(analisis.resultado is None for analisis in self._analisis)
+
+    
+    def avanzar_estado(self):
+        lista_errores = []
+        estado_actual = self._estado
+        nuevo_estado = self._siguiente_estado()
+        if nuevo_estado is None:
+            lista_errores.append(f"El estado actual de la muestra se encuentra {estado_actual}, por lo que no se puede modificar")
+            return lista_errores
+        if len(self._analisis) == 0:
+            lista_errores.append(f"La actual muestra no tiene ningun analisis asociado por lo que no se puede modificar su estado de {self._estado}")
+            return lista_errores
+        if nuevo_estado == "liberada" and self.tiene_resultados_pendientes():
+            lista_errores.append("No todos los analisis tienen resultado, por lo que no puede ser liberada")
+        if len(lista_errores) == 0:
+            self._estado = nuevo_estado
+        return lista_errores
+
+    def cancelar(self):
+        lista_errores = []
+        if self._estado not in ESTADOS_CANCELABLES:
+            lista_errores.append(f"La muestra no puede ser cancelada ya que se encuentra en estado: {self._estado}")
+        if len(lista_errores) == 0:
+            self._estado = "cancelada"
         return lista_errores
