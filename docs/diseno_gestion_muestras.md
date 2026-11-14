@@ -7,15 +7,28 @@ Para esto el usuario digita el ID de la muestra que busca que tiene el formato d
 El texto ingresado por el usuario se le aplica una transformación de formato para que las letras se cambien a mayusculas y se eliminen todos los espacios que estuvieran en medio-inicio-fin, para coincidir con el formato de los ID para mayor casos de input de los usuarios.
 En caso de que el usuario no ingrese nada o solo espacios vacios, la funcion devuelve None.
 
+## Análisis de una muestra
+Cada muestra tiene una lista de análisis, que son objetos de la clase `Analisis`. La muestra se crea sin análisis, y estos se agregan uno a uno mediante el método `agregar_analisis`, que es la única forma de modificarlos. Desde fuera de la clase, los análisis se pueden consultar, pero se entregan como tupla, para que no se puedan agregar ni quitar directamente.
+
+Al agregar un análisis se aplican dos reglas:
+
+- **Solo se agregan análisis mientras la muestra está en estado enviada.** Cuando la muestra pasa a confirmada, el laboratorio ya planificó el trabajo con los análisis que tenía asignados, por lo que agregar uno después alteraría ese plan. Además, agregar un análisis a una muestra liberada dejaría un análisis sin resultado en una muestra que ya fue reportada, lo que la regla de liberación busca impedir.
+- **No se permiten dos análisis con el mismo código** en una misma muestra. La comparación se hace por el código del análisis, ya que cada código identifica un único método en el catálogo.
+
+Si alguna regla no se cumple, el análisis no se agrega y el método devuelve una lista con el error correspondiente.
+
 ## Resultado de cada análisis
 El resultado de cada analisis se guarda como una clave en el diccionario respectivo, en la lista de analisis de cada muestra como "resultado". Al momento de la creacion de la muestra, este valor se asigna como None por defecto y cuando los resultados estan listos se modifica, Esta decision de dejar None y no utilizar algun valor numerico como 0, se define para evitar problemas por mala interpretacion o calculos al poder ser un valor que tomaria un resultado real cuando no se tiene conteo.
 Ejemplo:
 {"codigo": "A012", "nombre": "...", "norma": "...", "unidad": "UFC/g", "limite": 100, "resultado": ..., "fuera_especificacion": ...}
+NOTA:
+Cada uno de los análisi es un objeto de la clase Analisis, cuyo resultado está protegido por lo que se puede leer, pero solo es posible cambiarlo mediante el método de registro.
 
 ## Cuando se pueden registrar los resultados
 Los resultados es posible ingresarlos, en el momento que la muestra se encuentra en estado de "confirmada" por el laboratorio, que significa que se encuentra actualmente en proceso de analisis y reporte de resultados. 
 Mientras las muestras se encuentre en estado de "confirmada", los resultados no seran enviado o seran visibles para los clientes, ademas de poder modificar los resultados para corrección.
 Posterior a liberar la muestra los resultados quedan bloqueados, y no deberia ser posible modificar los resultados.
+Los resultados siempre se registran mediante el método registrar_resultado de la muestra, buscando el analisis por el código respectivo y delegando el registro al metodo del mismo nombre propio de la clase Analisis, que evalua las reglas relacionadas al valor del resultado ingresado. El metodo de igual nombre que esta en la clase analisis, quedo como interno, con guion bajo, para que no se pueda registrar algun resultado saltándose la revisión del estado.
 
 ## Fuera de norma
 Para un analisis se calcula si esta fuera de norma o especificación respecto al resultado cada vez que se consulta, como una propiedad de la clase. Puede tener un estado de None si es que no se a registrado ningun resultado (el resultado tiene el valor None almacenado), False si el resultado es menor o igual al limite de aceptacion definido para el analisis, y true si el valor del resultado es mayor al del limite.Este diseño se planteo en el sistema, para que este valor nunca pudiera quedar desactualizado y que solo se tenga una forma de consultarlo.
@@ -27,6 +40,7 @@ Las muestras pueden tener cuatro estados posibles, que son enviadas, confirmadas
 - Liberada: Las muestras ya tienen todos los resultados y fueron revisados para verificar que estuvieran correctamente cargadas, liberando los resultados para que sea visible al cliente o se pueda emitir el informe con todos los resultados. Si algun resultado se encuentra en None no es posible liberar la muestra.
 - Canceladas: Los clientes pueden solicitar cancelar determinada muestra, por distintos motivos. No se continuan o empiezan los analisis que estuvieran asociadas a esa muestra. Para modificar a este estatus debe ser previamente conversado y solicitado con jefatura.
 La trancision es lineal desde enviada luego a confirmada y finalmente a liberada, no siendo posible devolver a un estado anterior, manteniendo congruencia en el flujo de trabajo. Desde el estado de enviada y confirmada, puede modificarse a cancelada, pero una muestra liberada no puede ser cancelada ya que se completaron todos los analisis.
+Una muestra solo puede avanzar desde el estado enviada a cancelada cuando tenga a lo menos 1 analisis registrada.
 
 ## Listar muestras que se encuentran fuera de norma
 Se pueden listar las muestras que tengan resultado, y a su vez cumplan con la condicion de que supere el limite establecido, estando "fuera de especificacion", lo que se ve reflejado en la clave fuera_especificacion como un True. Se muestran todas las muestras en sistema que tengan a lo menos un analisis que cumplan la condición de especificación, sin importar el estado en que se encuentren (esto por temas de trazabilidad). Se agrupan en base al estado en que se encuentran en el sistema, teniendo el siguiente flujo confirmada->liberada->cancelada, y listada para una facil trazabilidad. En caso de que algun estado no tenga ninguna muestra fuera de especificación, no se muestra.
