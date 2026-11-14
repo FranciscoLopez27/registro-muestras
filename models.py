@@ -38,7 +38,11 @@ class Analisis:
         return self._resultado > self.limite
 
     def _registrar_resultado(self, valor):
-        """Registra o corrige el resultado del análisis.
+        """Uso interno: registra o corrige el resultado del análisis.
+
+        Los resultados se registran mediante Muestra.registrar_resultado,
+        que verifica que la muestra esté confirmada antes de llamar a este
+        método. Por eso no debe llamarse directamente desde fuera de models.py.
 
         Devuelve una lista de errores, vacía si el resultado se registró.
         Si hay errores, el resultado anterior se conserva.

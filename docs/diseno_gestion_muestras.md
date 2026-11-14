@@ -18,11 +18,11 @@ Al agregar un análisis se aplican dos reglas:
 Si alguna regla no se cumple, el análisis no se agrega y el método devuelve una lista con el error correspondiente.
 
 ## Resultado de cada análisis
-El resultado de cada analisis se guarda como una clave en el diccionario respectivo, en la lista de analisis de cada muestra como "resultado". Al momento de la creacion de la muestra, este valor se asigna como None por defecto y cuando los resultados estan listos se modifica, Esta decision de dejar None y no utilizar algun valor numerico como 0, se define para evitar problemas por mala interpretacion o calculos al poder ser un valor que tomaria un resultado real cuando no se tiene conteo.
-Ejemplo:
-{"codigo": "A012", "nombre": "...", "norma": "...", "unidad": "UFC/g", "limite": 100, "resultado": ..., "fuera_especificacion": ...}
-NOTA:
-Cada uno de los análisi es un objeto de la clase Analisis, cuyo resultado está protegido por lo que se puede leer, pero solo es posible cambiarlo mediante el método de registro.
+Cada análisis de una muestra es un objeto de la clase `Analisis`, que guarda una copia de los datos vigentes del catálogo (código, nombre, norma), la unidad elegida, el límite definido por el cliente y su resultado.
+
+Al crear el análisis, el resultado se inicia en None. Se decidió usar None y no un valor numérico como 0, porque 0 es un recuento real posible: usarlo para indicar "sin resultado" llevaría a confundir un análisis pendiente con uno que no tuvo crecimiento.
+
+El resultado está protegido: desde fuera de la clase se puede leer, pero solo cambia mediante el registro de resultados de la muestra, que aplica las reglas de estado y valida el valor.
 
 ## Cuando se pueden registrar los resultados
 Los resultados es posible ingresarlos, en el momento que la muestra se encuentra en estado de "confirmada" por el laboratorio, que significa que se encuentra actualmente en proceso de analisis y reporte de resultados. 
