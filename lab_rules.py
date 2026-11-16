@@ -52,9 +52,20 @@ def validar_muestra(datos_muestra):
     return lista_errores
 
 def agregar_muestra(lista_muestras, datos_muestra):
-    
+    """Registra una muestra nueva a partir de los datos ingresados por el usuario.
+
+    datos_muestra: diccionario con el cliente, la descripción y la lista de
+    análisis (cada uno con código, nombre, norma, unidad y límite).
+
+    Primero valida los datos con validar_muestra. Si son válidos, construye un
+    objeto Muestra con un id nuevo y le agrega cada análisis como objeto
+    Analisis, mediante agregar_analisis. La muestra queda en estado "enviada",
+    con la fecha de ingreso de hoy, y se agrega a lista_muestras.
+
+    Devuelve una tupla (id, errores): el id de la muestra nueva y una lista
+    vacía si se registró, o (None, errores) si los datos no son válidos.
+    """
     lista_errores = validar_muestra(datos_muestra)
-    
     if not lista_errores:
         id_muestra = generar_id(len(lista_muestras)+1)
         nueva_muestra = Muestra(id_muestra, datos_muestra["cliente"], datos_muestra["descripcion"])
