@@ -1,5 +1,4 @@
-import copy
-from datetime import date
+from models import (Analisis, Muestra)
 from constants import (
     CATALOGO_CLIENTES, CATALOGO_ANALISIS, ESTADOS_POSIBLES, ESTADOS_CANCELABLES, ESTADOS_EN_ORDEN
     )
@@ -57,19 +56,17 @@ def agregar_muestra(lista_muestras, datos_muestra):
     lista_errores = validar_muestra(datos_muestra)
     
     if not lista_errores:
-        nueva_muestra = copy.deepcopy(datos_muestra)
-        for analisis in nueva_muestra["analisis"]:
-            analisis["resultado"] = None
-            analisis["fuera_especificacion"] = None
-        nueva_muestra.update({
-            "id": generar_id(len(lista_muestras)+1),
-            "estado": "enviada",
-            "fecha_ingreso": date.today().isoformat()
-        })
+        id_muestra = generar_id(len(lista_muestras)+1)
+        nueva_muestra = Muestra(id_muestra, datos_muestra["cliente"], datos_muestra["descripcion"])
+        for analisis in datos_muestra["analisis"]:
+            nuevo_analisis = Analisis(analisis["codigo"], analisis["nombre"], analisis["norma"],
+                                    analisis["unidad"], analisis["limite"])
+            lista_errores.extend(nueva_muestra.agregar_analisis(nuevo_analisis))
         lista_muestras.append(nueva_muestra)
-        return (nueva_muestra["id"],lista_errores)
-    
+        return(nueva_muestra.id_muestra, lista_errores)
     return(None, lista_errores)
+
+
 
 def normalizar_codigo(texto, catalogo):
     """Limpia el texto ingresado y devuelve el código si existe en el catálogo, o None si no."""
@@ -91,7 +88,7 @@ def codigo_ya_agregado(lista_analisis, codigo):
 
 def buscar_muestra(lista_muestras, id_muestra):
     id_muestra = id_muestra.upper().replace(" ","")
-    return next((muestra for muestra in lista_muestras if id_muestra == muestra.get("id")), None)
+    return next((muestra for muestra in lista_muestras if id_muestra == muestra.id_muestra), None)
 
 def siguiente_estado(estado_actual):
     if estado_actual not in ESTADOS_POSIBLES:
@@ -147,13 +144,12 @@ def registrar_resultado(muestra, codigo_analisis, resultado):
 
 def muestras_fuera_norma(lista_muestras):
     return [muestra for muestra in lista_muestras 
-            if any(esta_fuera_de_especificacion(analisis) for analisis in muestra["analisis"])
-    ]
+            if any(analisis.fuera_especificacion for analisis in muestra.analisis)]
 
 def agrupar_por_estado(lista_muestras):
     por_estado = {}
     for muestra in lista_muestras:
-        por_estado.setdefault(muestra["estado"], []).append(muestra)
+        por_estado.setdefault(muestra.estado, []).append(muestra)
     ordenado = {estado: por_estado[estado] for estado in ESTADOS_EN_ORDEN if estado in por_estado}
     return ordenado
 
