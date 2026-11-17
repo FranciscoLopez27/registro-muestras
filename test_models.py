@@ -32,6 +32,11 @@ a._registrar_resultado(10)
 assert a.resultado == 10
 assert a.fuera_especificacion is False
 
+a = Analisis("A012","Conteo Enterobacterias", "ISO 21528-2", "UFC/g", 0)
+a._registrar_resultado(1)
+assert a.resultado == 1
+assert a.fuera_especificacion is True
+
 print("Todas las pruebas de Analisis pasaron")
 
 # ---------- Funciones auxiliares ----------
@@ -148,6 +153,14 @@ assert cancelada.estado == "cancelada"
 assert len(cancelada.registrar_resultado("A012", 50)) == 1
 assert cancelada.analisis[0].resultado == 20
 print("Muestra (registrar en liberada y cancelada): pruebas pasaron")
+
+# ---------- Registrar resultado: modificar un resultado y comprobar que cambia fuera de especificacion ----------
+p = muestra_con_analisis("A012")
+p.avanzar_estado()
+p.registrar_resultado("A012", 200)
+assert p.analisis[0].fuera_especificacion == True
+p.registrar_resultado("A012", 10)
+assert p.analisis[0].fuera_especificacion == False
 
 # ---------- Agregar análisis: solo en muestras enviadas ----------
 confirmada = muestra_con_analisis("A012")

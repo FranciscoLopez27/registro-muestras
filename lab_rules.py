@@ -1,6 +1,6 @@
 from models import (Analisis, Muestra)
 from constants import (
-    CATALOGO_CLIENTES, CATALOGO_ANALISIS, ESTADOS_POSIBLES, ESTADOS_CANCELABLES, ESTADOS_EN_ORDEN
+    CATALOGO_CLIENTES, CATALOGO_ANALISIS, ESTADOS_EN_ORDEN
     )
 
 
@@ -77,8 +77,6 @@ def agregar_muestra(lista_muestras, datos_muestra):
         return(nueva_muestra.id_muestra, lista_errores)
     return(None, lista_errores)
 
-
-
 def normalizar_codigo(texto, catalogo):
     """Limpia el texto ingresado y devuelve el código si existe en el catálogo, o None si no."""
     codigo = texto.strip().upper()
@@ -100,58 +98,6 @@ def codigo_ya_agregado(lista_analisis, codigo):
 def buscar_muestra(lista_muestras, id_muestra):
     id_muestra = id_muestra.upper().replace(" ","")
     return next((muestra for muestra in lista_muestras if id_muestra == muestra.id_muestra), None)
-
-def siguiente_estado(estado_actual):
-    if estado_actual not in ESTADOS_POSIBLES:
-        return None
-    indice = ESTADOS_POSIBLES.index(estado_actual)
-    if indice == len(ESTADOS_POSIBLES)-1:
-        return None
-    return ESTADOS_POSIBLES[indice+1]
-
-def tiene_resultado_pendiente(muestra):
-    return any(analisis["resultado"] is None for analisis in muestra["analisis"])
-
-def avanzar_estado(muestra):
-    lista_errores = []
-    estado_actual = muestra["estado"]
-    nuevo_estado = siguiente_estado(estado_actual)
-    if nuevo_estado is None:
-        lista_errores.append(f"El estado actual de la muestra se encuentra {estado_actual}, por lo que no se puede modificar")
-        return lista_errores
-    if nuevo_estado == "liberada" and tiene_resultado_pendiente(muestra):
-        lista_errores.append("No todos los analisis tienen resultado, por lo que no puede ser liberada")
-    if len(lista_errores) == 0:
-        muestra["estado"] = nuevo_estado
-    return lista_errores
-
-def cancelar_muestra(muestra):
-    lista_errores = []
-    estado_actual = muestra["estado"]
-    if estado_actual not in ESTADOS_CANCELABLES:
-        lista_errores.append(f"La muestra no puede ser cancelada ya que se encuentra en estado: {estado_actual}")
-    if len(lista_errores) == 0:
-        muestra["estado"] = "cancelada"
-    return lista_errores
-
-def esta_fuera_de_especificacion(analisis):
-    return analisis["resultado"] is not None and analisis["resultado"] > analisis["limite"]
-
-def registrar_resultado(muestra, codigo_analisis, resultado):
-    lista_errores = []
-    if muestra["estado"] != "confirmada":
-        lista_errores.append("La muestra debe estar en estado confirmada para asociarle resultados")
-        return lista_errores
-    if resultado < 0:
-        lista_errores.append("El resultado tiene que ser un valor mayor o igual a 0")
-    analisis_buscado = next((analisis for analisis in muestra["analisis"] if codigo_analisis == analisis.get("codigo")), None)
-    if analisis_buscado is None:
-        lista_errores.append("La muestra ingresada no tiene el analisis registrado")
-    if len(lista_errores) != 0:
-        return lista_errores
-    analisis_buscado["resultado"] = resultado
-    analisis_buscado["fuera_especificacion"] = esta_fuera_de_especificacion(analisis_buscado)
-    return lista_errores
 
 def muestras_fuera_norma(lista_muestras):
     return [muestra for muestra in lista_muestras 

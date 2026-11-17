@@ -1,6 +1,5 @@
 from lab_rules import(
-    agregar_muestra, avanzar_estado, cancelar_muestra,
-    registrar_resultado, muestras_fuera_norma, agrupar_por_estado
+    agregar_muestra, muestras_fuera_norma, agrupar_por_estado
 )
 from formatters import (
     listar_muestras, mostrar_errores, pausar
