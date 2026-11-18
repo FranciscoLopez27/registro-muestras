@@ -29,29 +29,30 @@ Para la estructura del catalogo de analisis sera un diccionario con diccionarios
 
 Ejemplo estructura:  
 Analisis:{  
-    "A012": {"nombre":"Conteo Enterobacterias", "norma":"ISO-21528-2", "unidad":["UFC/g","UFC/ml"]},  
-    "A013": {"nombre":"Conteo Coliformes", "norma":"ISO-4832", "unidad":["UFC/ml"]}, 
-    "A019": {"nombre":"Conteo Mohos y levaduras", "norma":"ISO-21527-2", "unidad":["UFC/g","UFC/ml"]},  
+    "A012": {"nombre":"Conteo Enterobacterias", "norma":"ISO 21528-2", "unidades":["UFC/g","UFC/ml"]},  
+    "A013": {"nombre":"Conteo Coliformes", "norma":"ISO 4832", "unidades":["UFC/ml"]}, 
+    "A019": {"nombre":"Conteo Mohos y levaduras", "norma":"ISO 21527-2", "unidades":["UFC/g","UFC/ml"]},  
 }  
 
 Posibles mejoras:  
 - Dias: Dias minimo que toma realizar el metodo en una muestra  
  
 
-## Que guarda cada muestra de sus análisis  
-En las muestras creadas para analizar en el laboratorio se guardan los siguientes valores como un diccionario:  
-- Codigo_analisis: Identificador del analisis de manera interna del laboratorio.  
-- Nombre: Nombre identificador del metodo analitico.
-- Norma: Norma internacional asociado al analisis.  
-- Limite: Limite declarado por el cliente que solicita la muestra para saber si el resultado esta fuera de especificación.  
-- Unidad: Unidad declarada por el cliente en el momento de solicitar el analisis para cuantificar el conteo obtenido.  
+## Qué guarda cada muestra de sus análisis
+Cada análisis de una muestra es un objeto de la clase `Analisis`, que guarda:
+- Código: identificador del análisis de manera interna del laboratorio.
+- Nombre: nombre identificador del método analítico, copiado del catálogo.
+- Norma: norma internacional o interna asociada al análisis, copiada del catálogo.
+- Unidad: unidad elegida al solicitar el análisis, entre las permitidas para el método.
+- Límite: límite declarado por el cliente para saber si el resultado está fuera de especificación.
+- Resultado: None hasta que se registra, protegido para que solo cambie mediante el registro de resultados de la muestra.
 
-Es necesario guardar el limite y la unidad, ya que los metodos microbiologicos internacionales cada cierto periodo se actualizan y a veces se modifican el alcance del metodo cambiando, que puede influir en la unidad que se haya ocupado en su momento ya no sea valida, o el tipo de analito ya no sea valido en la actualidad, pero que cuando estaba vigente esa versión era correcto.  
-Al registrar un analisis para una muestra, se debe elegir una unidad para el metodo y se debe verificar que este dentro de la lista de unidades validas. Enc aso de no estar se le pide nuevamente seleccionar una unidad valida.
+El nombre y la norma se copian del catálogo al momento de registrar la muestra, y la unidad y el límite se guardan junto a ellos, porque los métodos microbiológicos internacionales se actualizan cada cierto tiempo: puede cambiar su alcance, o una unidad que era válida en su momento puede dejar de serlo. Guardar estos datos permite conservar con qué versión del método se analizó cada muestra.
 
+Al registrar un análisis para una muestra, la unidad se elige de la lista de unidades válidas del método; si no es válida, se solicita nuevamente.
 
-Ejemplo estructura: 
-MUESTRA = {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2", "unidad": "UFC/g", "limite": 100}
+Ejemplo:
+Analisis("A012", "Conteo Enterobacterias", "ISO 21528-2", "UFC/g", 100)
 
 ## Cómo elige el usuario los analisis  
 El usuario debe elegir el analisis en base al codigo interno del método. Esta elección es mas robusta, aunque la idea final es que al momento de solicitar el analisis pueda desplegarlo en un cuadro con multiples selecciones donde pueden buscar visualmente el metodo que quieran o en una barra de busqueda donde puedan digitar la información.  
@@ -68,10 +69,15 @@ Por simplificar la implementacion es fuera de alcance por ahora. Pero la propues
 - Mayúsculas en un codigo: Se modifica para que el texto ingresado se transforme en mayuscula todas las letras y desde esa data se busca en el catalogo
 - Si se escibe un codigo que no exite: Se le notifica al usuario que el codigo digitado no existe dentro de la base de datos, y se le solicita ingresar nuevamente un codigo valido.
 
-## Regla nueva  
-Otra regla seria en que en una muestra no pueden haber metodos repetidos solicitados, el mismo metodo solo puede estar una vez para cada muestra. Para esto al momento de crearle un metodo se debe compara si hay otro identico en la muestra, y rechazar e informar al que esta creando la muestra que hay duplicidad de metodos y que no es posible, solicitando ingresar nuevamente la información.  
+## Regla nueva
+En una muestra no pueden haber métodos repetidos: cada método solo puede solicitarse una vez por muestra. La comparación se hace por el código del análisis, ya que cada código identifica un único método en el catálogo. Si se intenta agregar un método que ya está en la muestra, se rechaza y se informa al usuario que hay duplicidad de métodos, solicitando ingresar nuevamente la información.
 
-- Fuera de alcance: En los catalogos solo se puede ingresar una vez un metodo o un cliente. Para ello cuando se quiera ingresar un nuevo cliente, se debe comparar si ya existe uno con el mismo nombre (ya que los codigos van a asignarlos el sistema automaticamente). En el caso de los metodos, se debe compara el nombre y la norma internacional o interna asociada ya que son identificadores unicos del metodo. Todo esto con el fin de evitar duplicidad en la información.
+Esta regla se aplica en tres niveles:
+- **Al elegir los análisis en el menú:** el sistema no permite seleccionar un método que ya fue agregado a la muestra que se está registrando.
+- **Al validar los datos ingresados** (`validar_muestra`): se revisa nuevamente que no haya códigos repetidos, como respaldo, ya que en el futuro los datos podrían provenir de un archivo y no del menú.
+- **Al agregar el análisis a la muestra** (`Muestra.agregar_analisis`): la propia muestra rechaza un código repetido, por lo que la regla se cumple aunque se intente agregar un análisis por otro camino.
+
+- Fuera de alcance: En los catálogos solo se puede ingresar una vez un método o un cliente. Para ello, cuando se quiera ingresar un nuevo cliente, se debe comparar si ya existe uno con el mismo nombre (ya que los códigos los asignará el sistema automáticamente). En el caso de los métodos, se debe comparar el nombre y la norma internacional o interna asociada, ya que son identificadores únicos del método. Todo esto con el fin de evitar duplicidad en la información.
 
 ## Pseudo codigo de seleccion en los catalogos
 

@@ -43,8 +43,13 @@ La trancision es lineal desde enviada luego a confirmada y finalmente a liberada
 Una muestra sin análisis no puede avanzar de estado, por lo que una muestra enviada sin análisis asociado no puede pasar a confirmada (pero si podria ser cancelada).
 
 ## Listar muestras que se encuentran fuera de norma
-Se pueden listar las muestras que tengan resultado, y a su vez cumplan con la condicion de que supere el limite establecido, estando "fuera de especificacion", lo que se ve reflejado en la clave fuera_especificacion como un True. Se muestran todas las muestras en sistema que tengan a lo menos un analisis que cumplan la condición de especificación, sin importar el estado en que se encuentren (esto por temas de trazabilidad). Se agrupan en base al estado en que se encuentran en el sistema, teniendo el siguiente flujo confirmada->liberada->cancelada, y listada para una facil trazabilidad. En caso de que algun estado no tenga ninguna muestra fuera de especificación, no se muestra.
-Al listar se muestra toda la información de la muestra, incluido todos los analisis. Esto es asi, principalmente para que el analista o encargado de laboratorio pueda analizar la situacion de las muestras fuera de especificación en su totalidad, para tener criterio si es necesario contactar al cliente para informar o realizare repeticiones de analisis debido a indicios extraños en los resultados.
+Se listan todas las muestras que tienen a lo menos un análisis fuera de especificación, es decir, cuya propiedad `fuera_especificacion` vale True. Los análisis sin resultado (None) o dentro del límite (False) no hacen que la muestra aparezca. Una muestra con varios análisis fuera de especificación aparece una sola vez.
+
+Se incluyen las muestras sin importar su estado, incluidas las liberadas y canceladas, por temas de trazabilidad: permite revisar el historial de un cliente o de un lote aunque la muestra ya no esté en proceso.
+
+Las muestras se muestran agrupadas por estado, siguiendo el orden del flujo del laboratorio definido en `ESTADOS_EN_ORDEN`: enviada, confirmada, liberada y cancelada. En la práctica, una muestra enviada no puede aparecer, porque los resultados solo se registran en muestras confirmadas. Los estados que no tienen ninguna muestra fuera de especificación no se muestran.
+
+De cada muestra se despliega toda su información, incluidos los análisis que están dentro de especificación, para poder contrastar los resultados ante posibles desviaciones en el procesamiento de la muestra.
 
 ## Pseudocódigo
 
