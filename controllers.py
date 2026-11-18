@@ -1,6 +1,5 @@
 from lab_rules import(
-    agregar_muestra, avanzar_estado, cancelar_muestra,
-    registrar_resultado, muestras_fuera_norma, agrupar_por_estado
+    agregar_muestra, muestras_fuera_norma, agrupar_por_estado
 )
 from formatters import (
     listar_muestras, mostrar_errores, pausar
@@ -35,23 +34,23 @@ def opcion_cambiar_estado(lista_muestras):
     muestra_encontrada = pedir_muestra_existente(lista_muestras, "Digite el ID de la muestra que se quiere modificar el estado: \n")
     if muestra_encontrada is None:
         return
-    print(f"El estado actual de la muestra es: {muestra_encontrada['estado']}")
+    print(f"El estado actual de la muestra es: {muestra_encontrada.estado}")
     print("¿Que desea realizar con el estado de la muestra?")
     opcion_estado = input("1. Avanzar a siguiente estado.\n"
     "2. Cancelar muestra.\n" 
     "3. Regresar.\n"
     "Digite la opcion que desea realizar: ").strip()
     if opcion_estado == "1":
-        lista_errores = avanzar_estado(muestra_encontrada)
+        lista_errores = muestra_encontrada.avanzar_estado()
         if len(lista_errores) != 0:
             mostrar_errores("No se ha podido modificar el estado", lista_errores)
         else:
-            print(f"El estado ha sido cambiado a {muestra_encontrada['estado']}")
+            print(f"El estado ha sido cambiado a {muestra_encontrada.estado}")
 
     elif opcion_estado == "2":
-        print(f"¿Está seguro de que desea cancelar la muestra {muestra_encontrada['id']}?")
+        print(f"¿Está seguro de que desea cancelar la muestra {muestra_encontrada.id_muestra}?")
         if pedir_si_no("Esta acción no se puede deshacer y debe estar autorizada por jefatura."):
-            lista_errores = cancelar_muestra(muestra_encontrada)
+            lista_errores = muestra_encontrada.cancelar()
             if len(lista_errores) != 0:
                 mostrar_errores("No se ha podido modificar el estado", lista_errores)
             else:
@@ -70,22 +69,23 @@ def opcion_registrar_resultado(lista_muestras):
     muestra_encontrada = pedir_muestra_existente(lista_muestras, "Digite el ID de la muestra que quiere ingresar resultado: \n")
     if muestra_encontrada is None:
         return
-    if muestra_encontrada["estado"] != "confirmada":
-        print(f"Para reportar resultados la muestra debe estar en estado confirmada y se encuentra en estado: {muestra_encontrada["estado"]}")
+    if muestra_encontrada.estado != "confirmada":
+        print(f"Para reportar resultados la muestra debe estar en estado confirmada y se encuentra en estado: {muestra_encontrada.estado}")
         print("Favor modificar estado antes de reportar resultados")
         print("Si no es posible modificar estado, contactar con jefatura o cliente")
         pausar()
         return
-    analisis_muestra = {analisis["codigo"]: analisis for analisis in muestra_encontrada["analisis"]}
+    analisis_muestra = {analisis.codigo: {"nombre": analisis.nombre} for analisis in muestra_encontrada.analisis}
     codigo_elegido = elegir_codigo(analisis_muestra, "Seleccione un codigo de los siguientes analisis de la muestra")
     resultado_ingresado = pedir_entero("Ingresar el valor del resultado del analisis:\n")
-    errores = registrar_resultado(muestra_encontrada, codigo_elegido, resultado_ingresado)
+    errores = muestra_encontrada.registrar_resultado(codigo_elegido, resultado_ingresado)
     if len(errores) != 0:
         mostrar_errores("El resultado no ha podido ser registrado", errores)
 
     else:
         print(f"El resultado {resultado_ingresado} ha sido ingresado correctamente en el análisis {codigo_elegido}")
-        if analisis_muestra[codigo_elegido]["fuera_especificacion"]:
+        analisis_encontrado = next(analisis for analisis in muestra_encontrada.analisis if analisis.codigo == codigo_elegido)
+        if analisis_encontrado.fuera_especificacion:
             print(f"El resultado quedo fuera de especificación")       
         else:
             print(f"El resultado quedo dentro de especificación")

@@ -1,15 +1,11 @@
 from datetime import date
 from lab_rules import(
-    generar_id, validar_muestra, siguiente_estado, tiene_resultado_pendiente,
-    esta_fuera_de_especificacion, normalizar_codigo, unidad_desde_opcion,
-    codigo_ya_agregado, buscar_muestra, avanzar_estado, cancelar_muestra,
-    registrar_resultado, muestras_fuera_norma, agrupar_por_estado,
+    generar_id, validar_muestra, normalizar_codigo, unidad_desde_opcion,
+    codigo_ya_agregado, buscar_muestra, muestras_fuera_norma, agrupar_por_estado, agregar_muestra
 )
-from controllers import(agregar_muestra)
 from constants import(CATALOGO_CLIENTES, CATALOGO_ANALISIS,)
-
-from sample_data import(muestras_de_ejemplo)
 from formatters import listar_muestras
+from sample_data import(muestras_de_ejemplo, crear_muestra_ejemplo)
 
 analisis_ok = [
     {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2", "unidad": "UFC/g", "limite": 100},
@@ -68,9 +64,9 @@ muestras = []
 id_nuevo, errores = agregar_muestra(muestras, datos_ok)
 assert id_nuevo == "M-0001" and errores == []
 assert len(muestras) == 1
-assert muestras[0]["estado"] == "enviada"
-assert muestras[0]["cliente"] == "0042"
-assert muestras[0]["fecha_ingreso"] == date.today().isoformat()
+assert muestras[0].estado == "enviada"
+assert muestras[0].cliente == "0042"
+assert muestras[0].fecha_ingreso == date.today().isoformat()
 
 # Datos inválidos: no se agrega
 id_nuevo, errores = agregar_muestra(muestras, {**datos_ok, "cliente": "99"})
@@ -80,10 +76,9 @@ assert len(muestras) == 1
 # Mismo diccionario dos veces: deben ser muestras distintas
 id_nuevo, _ = agregar_muestra(muestras, datos_ok)
 assert id_nuevo == "M-0002"
-assert muestras[0]["id"] == "M-0001"          # la primera no cambió
+assert muestras[0].id_muestra == "M-0001"          # la primera no cambió
 assert "id" not in datos_ok                   # los datos originales no se modificaron
 
-# Copia profunda: cambiar los datos originales no altera la muestra registrada
 datos_otro = {
     "cliente": "0044",
     "descripcion": "Queso fresco",
@@ -91,7 +86,7 @@ datos_otro = {
 }
 agregar_muestra(muestras, datos_otro)
 datos_otro["analisis"].append({"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2", "unidad": "UFC/g", "limite": 100})
-assert len(muestras[2]["analisis"]) == 1
+assert len(muestras[2].analisis) == 1
 print("agregar_muestra: todas las pruebas pasaron")
 
 # ---------- listar_muestras (revisión visual) ----------
@@ -138,155 +133,41 @@ assert codigo_ya_agregado(agregados, "A01") is False    # parecido, pero no igua
 print("codigo_ya_agregado: todas las pruebas pasaron")
 
 # ---------- buscar_muestra ----------
-assert buscar_muestra(muestras, "M-0002")["id"] == "M-0002"
-assert buscar_muestra(muestras, "m-0002")["id"] == "M-0002"     # minúsculas
-assert buscar_muestra(muestras, " M-0002 ")["id"] == "M-0002"   # espacios en los extremos
-assert buscar_muestra(muestras, "M- 0002")["id"] == "M-0002"    # espacio en el medio
+assert buscar_muestra(muestras, "M-0002").id_muestra == "M-0002"
+assert buscar_muestra(muestras, "m-0002").id_muestra == "M-0002"     # minúsculas
+assert buscar_muestra(muestras, " M-0002 ").id_muestra == "M-0002"   # espacios en los extremos
+assert buscar_muestra(muestras, "M- 0002").id_muestra == "M-0002"    # espacio en el medio
 assert buscar_muestra(muestras, "M-9999") is None               # no existe
 assert buscar_muestra(muestras, "") is None                     # vacío
 assert buscar_muestra([], "M-0001") is None                     # lista vacía
 print("buscar_muestra: todas las pruebas pasaron")
 
-# ---------- siguiente_estado ----------
-assert siguiente_estado("enviada") == "confirmada"
-assert siguiente_estado("confirmada") == "liberada"
-assert siguiente_estado("liberada") is None       # último estado
-assert siguiente_estado("cancelada") is None      # fuera de la secuencia
-assert siguiente_estado("desconocido") is None
-print("siguiente_estado: todas las pruebas pasaron")
-
-assert all(analisis["resultado"] is None for analisis in muestras[0]["analisis"])
-
-# ---------- tiene_resultado_pendiente ----------
-ejemplos = muestras_de_ejemplo()
-
-assert tiene_resultado_pendiente(ejemplos[0]) is True    # M-0001: ningún resultado
-assert tiene_resultado_pendiente(ejemplos[1]) is True    # M-0002: uno con resultado y otro pendiente
-assert tiene_resultado_pendiente(ejemplos[2]) is False   # M-0003: resultado 0, no está pendiente
-assert tiene_resultado_pendiente(ejemplos[3]) is True    # M-0004: ningún resultado
-
-# Todos los análisis con resultado
-completa = ejemplos[1]
-completa["analisis"][1]["resultado"] = 30
-assert tiene_resultado_pendiente(completa) is False
-print("tiene_resultado_pendiente: todas las pruebas pasaron")
-
-# ---------- avanzar_estado ----------
-ejemplos = muestras_de_ejemplo()
-enviada, confirmada, liberada, cancelada = ejemplos
-
-# Enviada → confirmada
-assert avanzar_estado(enviada) == []
-assert enviada["estado"] == "confirmada"
-
-# Confirmada con un resultado pendiente: no se puede liberar
-assert len(avanzar_estado(confirmada)) == 1
-assert confirmada["estado"] == "confirmada"
-
-# Confirmada con todos los resultados: se libera
-confirmada["analisis"][1]["resultado"] = 30
-assert avanzar_estado(confirmada) == []
-assert confirmada["estado"] == "liberada"
-
-# Liberada: no puede avanzar
-assert len(avanzar_estado(liberada)) == 1
-assert liberada["estado"] == "liberada"
-
-# Cancelada: no puede avanzar
-assert len(avanzar_estado(cancelada)) == 1
-assert cancelada["estado"] == "cancelada"
-print("avanzar_estado: todas las pruebas pasaron")
-
-# ---------- cancelar_muestra ----------
-enviada, confirmada, liberada, cancelada = muestras_de_ejemplo()
-
-assert cancelar_muestra(enviada) == []
-assert enviada["estado"] == "cancelada"
-
-assert cancelar_muestra(confirmada) == []
-assert confirmada["estado"] == "cancelada"
-
-assert len(cancelar_muestra(liberada)) == 1
-assert liberada["estado"] == "liberada"
-
-assert len(cancelar_muestra(cancelada)) == 1
-assert cancelada["estado"] == "cancelada"
-print("cancelar_muestra: todas las pruebas pasaron")
-
-# ---------- esta_fuera_de_especificacion ----------
-def analisis_con(resultado, limite=100):
-    return {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2",
-            "unidad": "UFC/g", "limite": limite, "resultado": resultado}
-
-assert esta_fuera_de_especificacion(analisis_con(250)) is True     # supera el límite
-assert esta_fuera_de_especificacion(analisis_con(100)) is False    # igual al límite
-assert esta_fuera_de_especificacion(analisis_con(0)) is False      # recuento 0
-assert esta_fuera_de_especificacion(analisis_con(None)) is False   # sin resultado
-assert esta_fuera_de_especificacion(analisis_con(1, limite=0)) is True   # límite 0
-print("esta_fuera_de_especificacion: todas las pruebas pasaron")
-
-# ---------- registrar_resultado ----------
-enviada, confirmada, liberada, cancelada = muestras_de_ejemplo()
-
-def analisis_de(muestra, codigo):
-    return next(analisis for analisis in muestra["analisis"] if analisis["codigo"] == codigo)
-
-# Registrar un resultado dentro de especificación
-assert registrar_resultado(confirmada, "A013", 30) == []
-assert analisis_de(confirmada, "A013")["resultado"] == 30
-assert analisis_de(confirmada, "A013")["fuera_especificacion"] is False
-
-# Registrar un resultado fuera de especificación
-assert registrar_resultado(confirmada, "A012", 500) == []
-assert analisis_de(confirmada, "A012")["resultado"] == 500
-assert analisis_de(confirmada, "A012")["fuera_especificacion"] is True
-
-# Corregir un resultado: el fuera de especificación se recalcula
-assert registrar_resultado(confirmada, "A012", 50) == []
-assert analisis_de(confirmada, "A012")["fuera_especificacion"] is False
-
-# Código que no pertenece a la muestra
-assert len(registrar_resultado(confirmada, "A019", 10)) == 1
-
-# Resultado negativo: no se modifica el valor anterior
-assert len(registrar_resultado(confirmada, "A013", -5)) == 1
-assert analisis_de(confirmada, "A013")["resultado"] == 30
-
-# Varios errores a la vez: negativo y código inexistente
-assert len(registrar_resultado(confirmada, "A019", -5)) == 2
-
-# Muestra enviada: aún no se pueden registrar resultados
-assert len(registrar_resultado(enviada, "A012", 10)) == 1
-assert analisis_de(enviada, "A012")["resultado"] is None
-
-# Muestra liberada: los resultados están bloqueados
-assert len(registrar_resultado(liberada, "A019", 5)) == 1
-assert analisis_de(liberada, "A019")["resultado"] == 0
-print("registrar_resultado: todas las pruebas pasaron")
-
-# ---------- muestras_fuera_norma ----------
+# ---------- Funciones auxiliares ----------
 def muestra_con(id_muestra, estado, analisis):
-    return {"id": id_muestra, "cliente": "0042", "descripcion": "Prueba",
-            "estado": estado, "fecha_ingreso": "2026-11-05", "analisis": analisis}
+    """Crea una muestra de prueba llevándola por el flujo real hasta el estado indicado.
+    analisis: lista de tuplas (codigo, unidad, limite, resultado)."""
+    return crear_muestra_ejemplo(id_muestra, "0042", "Prueba", "2026-11-05", analisis, estado)
 
 def ids(muestras):
-    return [muestra["id"] for muestra in muestras]
+    return [muestra.id_muestra for muestra in muestras]
 
+# ---------- muestras_fuera_norma ----------
 # Con las muestras de ejemplo, solo M-0002 tiene un resultado fuera (250 con límite 100)
 assert ids(muestras_fuera_norma(muestras_de_ejemplo())) == ["M-0002"]
 
 # Se incluyen sin importar el estado, incluidas liberadas y canceladas
-liberada_fuera = muestra_con("M-0101", "liberada", [analisis_con(500)])
-cancelada_fuera = muestra_con("M-0102", "cancelada", [analisis_con(500)])
-dentro = muestra_con("M-0103", "confirmada", [analisis_con(50)])
+liberada_fuera = muestra_con("M-0101", "liberada", [("A012", "UFC/g", 100, 500)])
+cancelada_fuera = muestra_con("M-0102", "cancelada", [("A012", "UFC/g", 100, 500)])
+dentro = muestra_con("M-0103", "confirmada", [("A012", "UFC/g", 100, 50)])
 assert ids(muestras_fuera_norma([liberada_fuera, dentro, cancelada_fuera])) == ["M-0101", "M-0102"]
 
 # Dos análisis fuera de especificación: la muestra aparece una sola vez
-doble_fuera = muestra_con("M-0104", "confirmada", [analisis_con(500), analisis_con(300)])
+doble_fuera = muestra_con("M-0104", "confirmada",
+                        [("A012", "UFC/g", 100, 500), ("A019", "UFC/g", 1000, 1500)])
 assert ids(muestras_fuera_norma([doble_fuera])) == ["M-0104"]
 
 # Sin resultado no cuenta como fuera de norma
-pendiente = muestra_con("M-0105", "confirmada", [analisis_con(None)])
+pendiente = muestra_con("M-0105", "confirmada", [("A012", "UFC/g", 100, None)])
 assert muestras_fuera_norma([pendiente]) == []
 
 # Lista vacía
@@ -303,8 +184,9 @@ assert ids(grupos["confirmada"]) == ["M-0002"]
 grupos_invertidos = agrupar_por_estado(list(reversed(ejemplos)))
 assert list(grupos_invertidos) == ["enviada", "confirmada", "liberada", "cancelada"]
 
-# Los estados sin muestras no aparecen
-solo_liberadas = [muestra_con("M-0201", "liberada", []), muestra_con("M-0202", "liberada", [])]
+# Los estados sin muestras no aparecen (cada muestra necesita un análisis con resultado para liberarse)
+solo_liberadas = [muestra_con("M-0201", "liberada", [("A012", "UFC/g", 100, 10)]),
+                muestra_con("M-0202", "liberada", [("A012", "UFC/g", 100, 10)])]
 assert list(agrupar_por_estado(solo_liberadas)) == ["liberada"]
 assert ids(agrupar_por_estado(solo_liberadas)["liberada"]) == ["M-0201", "M-0202"]
 

@@ -84,6 +84,7 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 | Archivo | Contenido |
 |---|---|
 | `main.py` | Punto de entrada: muestra el menú y dirige cada opción a su controlador. |
+| `models.py` | Clases `Analisis` y `Muestra`: representan los datos del laboratorio y protegen sus reglas (estados, análisis y resultados). |
 | `controllers.py` | Coordina cada opción del menú: agregar, listar, buscar, cambiar estado, registrar resultados y listar fuera de norma. |
 | `inputs.py` | Pide datos al usuario: selección desde catálogos, unidades, números y búsqueda de muestras. |
 | `formatters.py` | Muestra la información en pantalla: listados, errores, menú y pausas. |
@@ -91,6 +92,7 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 | `constants.py` | Datos fijos: catálogos de clientes y análisis, y estados de las muestras. |
 | `sample_data.py` | Muestras de ejemplo para pruebas. |
 | `test_registro.py` | Pruebas automáticas de las reglas del laboratorio. |
+| `test_models.py` | Pruebas automáticas de las clases `Analisis` y `Muestra`. |
 
 Las reglas del laboratorio no dependen de la interacción ni de la presentación,
 por lo que podrían reutilizarse con otra interfaz, por ejemplo una web.
