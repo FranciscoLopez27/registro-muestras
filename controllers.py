@@ -78,7 +78,7 @@ def opcion_registrar_resultado(lista_muestras):
     analisis_muestra = {analisis.codigo: {"nombre": analisis.nombre} for analisis in muestra_encontrada.analisis}
     codigo_elegido = elegir_codigo(analisis_muestra, "Seleccione un codigo de los siguientes analisis de la muestra")
     resultado_ingresado = pedir_entero("Ingresar el valor del resultado del analisis:\n")
-    errores = muestra_encontrada.registrar_resultado(codigo_elegido,resultado_ingresado) 
+    errores = muestra_encontrada.registrar_resultado(codigo_elegido, resultado_ingresado)
     if len(errores) != 0:
         mostrar_errores("El resultado no ha podido ser registrado", errores)
 

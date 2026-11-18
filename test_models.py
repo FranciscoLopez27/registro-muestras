@@ -158,9 +158,10 @@ print("Muestra (registrar en liberada y cancelada): pruebas pasaron")
 p = muestra_con_analisis("A012")
 p.avanzar_estado()
 p.registrar_resultado("A012", 200)
-assert p.analisis[0].fuera_especificacion == True
+assert p.analisis[0].fuera_especificacion is True
 p.registrar_resultado("A012", 10)
-assert p.analisis[0].fuera_especificacion == False
+assert p.analisis[0].fuera_especificacion is False
+print("Muestra (modificar resultado y actualizacion de especificación): pruebas pasaron")
 
 # ---------- Agregar análisis: solo en muestras enviadas ----------
 confirmada = muestra_con_analisis("A012")

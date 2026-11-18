@@ -17,8 +17,7 @@ considerando también las funciones que llama.
 | Archivo | Responsabilidad | Contenido |
 |---|---|---|
 | `constants.py` | Datos fijos del laboratorio | CATALOGO_CLIENTES, CATALOGO_ANALISIS, ESTADOS_POSIBLES, ESTADOS_CANCELABLES, ESTADOS_EN_ORDEN |
-| `models.py` | Representar los datos del laboratorio y proteger sus reglas | Clases `Analisis` (resultado protegido, propiedad `fuera_especificacion`) y 
-`Muestra` (estado y análisis protegidos; métodos `agregar_analisis`, `avanzar_estado`, `cancelar`, `registrar_resultado`, `tiene_resultados_pendientes`) |
+| `models.py` | Representar los datos del laboratorio y proteger sus reglas | Clases `Analisis` (resultado protegido, propiedad `fuera_especificacion`) y `Muestra` (estado y análisis protegidos; métodos `agregar_analisis`, `avanzar_estado`, `cancelar`, `registrar_resultado`, `tiene_resultados_pendientes`) |
 | `lab_rules.py` | Reglas del laboratorio que trabajan con la colección de muestras o con los catálogos, sin `input` ni `print` | generar_id, validar_muestra, agregar_muestra, normalizar_codigo, unidad_desde_opcion, codigo_ya_agregado, buscar_muestra, muestras_fuera_norma, agrupar_por_estado |
 | `inputs.py` | Pedir datos al usuario | pedir_entero, pedir_muestra_existente, elegir_codigo, elegir_unidad, pedir_analisis_catalogo, pedir_analisis, pedir_datos_muestra |
 | `formatters.py` | Mostrar información en pantalla | TEXTOS_EN_BASE_A_RESULTADOS, listar_muestras, mostrar_errores, mostrar_menu, pausar |
@@ -53,8 +52,9 @@ Cada módulo solo puede importar de los módulos que están más abajo en esta l
 3. `inputs` importa de `formatters`, `lab_rules` y `constants`.
 4. `formatters` importa de `constants`.
 5. `lab_rules` importa `constants` y `models`.
-6. `constants` no importa de ningún módulo del proyecto.
-7. `models` importa `constants`.
+6. `models` importa `constants`.
+7. `constants` no importa de ningún módulo del proyecto.
+
 
 Las reglas del laboratorio nunca dependen de la interacción ni de la presentación.
 Así se evitan importes circulares, y las reglas pueden reutilizarse aunque cambie

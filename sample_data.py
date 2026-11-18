@@ -5,6 +5,24 @@ ESTADOS_QUE_PASAN_POR_CONFIRMADA = ("confirmada", "liberada", "cancelada")
 
 
 def crear_muestra_ejemplo(id_muestra, cliente, descripcion, fecha_ingreso, lista_analisis, estado_buscado):
+    """Crea una muestra de ejemplo llevándola por el flujo real del laboratorio
+    hasta el estado indicado, respetando todas las reglas de la clase Muestra.
+
+    lista_analisis: lista de tuplas (codigo, unidad, limite, resultado).
+        El nombre y la norma de cada análisis se toman de CATALOGO_ANALISIS.
+        resultado puede ser None si el análisis no tiene resultado.
+    estado_buscado: "enviada", "confirmada", "liberada" o "cancelada".
+
+    Pasos: agrega los análisis mientras la muestra está enviada; si el estado
+    buscado lo requiere, la confirma y registra los resultados que no son None;
+    por último, la libera o la cancela según corresponda. Las muestras
+    canceladas se cancelan después de confirmarlas, para conservar sus resultados.
+
+    Si alguna regla impide llegar al estado buscado (por ejemplo, liberar con un
+    resultado pendiente), muestra un aviso y devuelve la muestra en el estado
+    al que alcanzó a llegar. Un código que no existe en el catálogo produce un
+    KeyError, para detectar de inmediato una receta mal escrita.
+    """
     muestra = Muestra(id_muestra, cliente, descripcion, fecha_ingreso)
     errores = []
     

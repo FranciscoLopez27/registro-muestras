@@ -1,15 +1,11 @@
 from datetime import date
 from lab_rules import(
     generar_id, validar_muestra, normalizar_codigo, unidad_desde_opcion,
-    codigo_ya_agregado, buscar_muestra, muestras_fuera_norma, agrupar_por_estado,
+    codigo_ya_agregado, buscar_muestra, muestras_fuera_norma, agrupar_por_estado, agregar_muestra
 )
-from lab_rules import(agregar_muestra)
 from constants import(CATALOGO_CLIENTES, CATALOGO_ANALISIS,)
-
-from sample_data import(muestras_de_ejemplo)
 from formatters import listar_muestras
-
-from sample_data import muestras_de_ejemplo, crear_muestra_ejemplo
+from sample_data import(muestras_de_ejemplo, crear_muestra_ejemplo)
 
 analisis_ok = [
     {"codigo": "A012", "nombre": "Conteo Enterobacterias", "norma": "ISO 21528-2", "unidad": "UFC/g", "limite": 100},
@@ -83,7 +79,6 @@ assert id_nuevo == "M-0002"
 assert muestras[0].id_muestra == "M-0001"          # la primera no cambió
 assert "id" not in datos_ok                   # los datos originales no se modificaron
 
-# Copia profunda: cambiar los datos originales no altera la muestra registrada
 datos_otro = {
     "cliente": "0044",
     "descripcion": "Queso fresco",
