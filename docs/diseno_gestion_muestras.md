@@ -51,6 +51,19 @@ Las muestras se muestran agrupadas por estado, siguiendo el orden del flujo del 
 
 De cada muestra se despliega toda su información, incluidos los análisis que están dentro de especificación, para poder contrastar los resultados ante posibles desviaciones en el procesamiento de la muestra.
 
+## Manejo de errores
+El sistema usa dos formas de informar errores, según el tipo de situación:
+
+- **Lista de errores, para validar los datos ingresados por el usuario** (`validar_muestra`). Se revisan todos los campos (cliente, descripción, análisis, unidades y límites) y se devuelven todos los problemas encontrados juntos, para que el usuario pueda corregirlos de una sola vez.
+- **Excepciones, para las reglas de las clases `Muestra` y `Analisis`** (agregar análisis, avanzar o cancelar el estado, registrar resultados). Cada una de estas operaciones no puede continuar cuando encuentra un problema, por lo que, en la práctica, solo puede informar un error a la vez. Con una excepción, además, el error no puede ignorarse por olvido: quien llama a la operación debe atenderlo, o el programa se detiene y lo informa.
+
+Las excepciones propias del laboratorio se organizan en una jerarquía:
+- `ErrorLaboratorio`: error general de las reglas del laboratorio.
+  - `ErrorEstado`: la operación no está permitida en el estado actual de la muestra (por ejemplo, registrar un resultado en una muestra liberada).
+  - `ErrorValor`: un dato no cumple las reglas (por ejemplo, un resultado negativo o un análisis repetido).
+
+Las clases lanzan estas excepciones donde se protege cada regla, y los controladores del menú las atienden para mostrar un mensaje al usuario. Distinguir los tipos permite que el controlador reaccione de forma distinta según el problema; cuando no necesita distinguirlos, puede atenderlos todos juntos como `ErrorLaboratorio`.
+
 ## Pseudocódigo
 
 ## Funcion que devuelve el siguiente estatus al que es ingresado
