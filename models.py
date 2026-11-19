@@ -1,5 +1,6 @@
 from datetime import date
 from constants import (ESTADOS_POSIBLES, ESTADOS_CANCELABLES)
+from exceptions import (ErrorEstado, ErrorLaboratorio, ErrorValor, ErrorNoEncontrado)
 
 class Analisis:
     """Un análisis solicitado para una muestra, con una copia de los datos
@@ -44,16 +45,13 @@ class Analisis:
         que verifica que la muestra esté confirmada antes de llamar a este
         método. Por eso no debe llamarse directamente desde fuera de models.py.
 
-        Devuelve una lista de errores, vacía si el resultado se registró.
-        Si hay errores, el resultado anterior se conserva.
+        Lanza ErrorValor si el valor es negativo; en ese caso, el resultado
+        anterior se conserva.
         """
-        lista_errores = []
         if valor < 0:
-            lista_errores.append("El resultado tiene que ser un valor mayor o igual a 0")
-        if len(lista_errores) != 0:
-            return lista_errores
+            raise ErrorValor("El resultado tiene que ser un valor mayor o igual a 0")
         self._resultado = valor
-        return lista_errores
+        
 
 class Muestra:
     """Una muestra ingresada al laboratorio, con sus análisis y su estado.
@@ -158,21 +156,20 @@ class Muestra:
     def registrar_resultado(self, codigo_analisis, resultado):
         """Registra o corrige el resultado de uno de los análisis de la muestra.
 
-        Solo es posible si la muestra está confirmada. Devuelve una lista de
-        errores, vacía si se registró, incluidos los errores del propio
-        análisis, como un valor negativo.
+        Solo es posible mientras la muestra está confirmada. Lanza:
+        - ErrorEstado: si la muestra no está confirmada.
+        - ErrorNoEncontrado: si la muestra no tiene un análisis con ese código.
+        - ErrorValor: si el resultado no es válido (por ejemplo, negativo).
+        Este error lo lanza el propio análisis y llega sin cambios.
+
+        Si se lanza cualquiera de estos errores, ningún resultado se modifica.
         """
-        lista_errores = []
         if self._estado != "confirmada":
-            lista_errores.append("La muestra debe estar en estado confirmada para asociarle resultados")
-            return lista_errores
+            raise ErrorEstado("La muestra debe estar en estado confirmada para asociarle resultados")
         analisis_buscado = next((analisis for analisis in self._analisis if codigo_analisis == analisis.codigo), None)
         if analisis_buscado is None:
-            lista_errores.append(f"La muestra ingresada no tiene el analisis {codigo_analisis} registrado")
-        if len(lista_errores) != 0:
-            return lista_errores
-        lista_errores.extend(analisis_buscado._registrar_resultado(resultado))
-        return lista_errores
+            raise ErrorNoEncontrado(f"La muestra ingresada no tiene el analisis {codigo_analisis} registrado")
+        analisis_buscado._registrar_resultado(resultado)
         
 
 

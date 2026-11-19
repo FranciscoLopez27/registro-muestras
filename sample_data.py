@@ -1,5 +1,6 @@
 from models import Analisis, Muestra
 from constants import CATALOGO_ANALISIS
+from exceptions import (ErrorValor, ErrorNoEncontrado, ErrorEstado, ErrorLaboratorio)
 
 ESTADOS_QUE_PASAN_POR_CONFIRMADA = ("confirmada", "liberada", "cancelada")
 
@@ -36,7 +37,11 @@ def crear_muestra_ejemplo(id_muestra, cliente, descripcion, fecha_ingreso, lista
         errores.extend(muestra.avanzar_estado())
         for codigo, _, _, resultado in lista_analisis:
             if resultado is not None:
-                errores.extend(muestra.registrar_resultado(codigo, resultado))
+                try:
+                    muestra.registrar_resultado(codigo, resultado)
+                except ErrorLaboratorio as error:
+                    errores.append(str(error))
+                    
     if estado_buscado == "cancelada":
         errores.extend(muestra.cancelar())
     elif estado_buscado == "liberada":

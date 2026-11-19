@@ -9,6 +9,8 @@ from inputs import(
     elegir_codigo, pedir_entero, pedir_si_no
 )
 
+from exceptions import(ErrorNoEncontrado, ErrorEstado, ErrorValor, ErrorLaboratorio)
+
 def opcion_agregar_muestra(lista_muestras):
     id_nuevo, errores = agregar_muestra(lista_muestras,pedir_datos_muestra())
     if errores:
@@ -78,9 +80,19 @@ def opcion_registrar_resultado(lista_muestras):
     analisis_muestra = {analisis.codigo: {"nombre": analisis.nombre} for analisis in muestra_encontrada.analisis}
     codigo_elegido = elegir_codigo(analisis_muestra, "Seleccione un codigo de los siguientes analisis de la muestra")
     resultado_ingresado = pedir_entero("Ingresar el valor del resultado del analisis:\n")
-    errores = muestra_encontrada.registrar_resultado(codigo_elegido, resultado_ingresado)
-    if len(errores) != 0:
-        mostrar_errores("El resultado no ha podido ser registrado", errores)
+    
+    try:
+        muestra_encontrada.registrar_resultado(codigo_elegido, resultado_ingresado)
+
+    except ErrorEstado as error:
+        print(f"\nNo se registró el resultado: {error}")
+        print("Cambie primero el estado de la muestra a confirmada, desde la opción 4 del menú.")
+    except ErrorNoEncontrado as error:
+        print(f"\nNo se registró el resultado: {error}")
+        print("Revise los análisis de la muestra con la opción 3 del menú.")
+    except ErrorValor as error:
+        print(f"\nNo se registró el resultado: {error}")
+        print("Vuelva a ingresar el resultado con un valor válido.")
 
     else:
         print(f"El resultado {resultado_ingresado} ha sido ingresado correctamente en el análisis {codigo_elegido}")
@@ -90,7 +102,7 @@ def opcion_registrar_resultado(lista_muestras):
         else:
             print(f"El resultado quedo dentro de especificación")
     pausar()
-    return
+        
 
 def opcion_listar_fuera_de_norma(lista_muestras):
     muestras_fuera_especificacion = muestras_fuera_norma(lista_muestras)

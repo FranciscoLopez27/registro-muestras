@@ -1,5 +1,14 @@
 from models import (Analisis, Muestra)
 from datetime import date
+from exceptions import (ErrorLaboratorio,ErrorEstado,ErrorNoEncontrado,ErrorValor)
+
+def lanza(tipo_error, funcion, *argumentos):
+    """Devuelve True si llamar a funcion(*argumentos) lanza un error del tipo indicado."""
+    try:
+        funcion(*argumentos)
+    except tipo_error:
+        return True
+    return False
 
 a = Analisis("A012","Conteo Enterobacterias", "ISO 21528-2", "UFC/g", 100)
 assert a.resultado is None
@@ -20,9 +29,8 @@ a._registrar_resultado(0)
 assert a.resultado == 0
 assert a.fuera_especificacion is False
 
-a._registrar_resultado(-1)
+assert lanza(ErrorValor, a._registrar_resultado, -1)
 assert a.resultado == 0
-assert len(a._registrar_resultado(-1)) != 0
 assert a.fuera_especificacion is False
 
 a._registrar_resultado(200)
@@ -118,21 +126,21 @@ print("Muestra (cancelar): pruebas pasaron")
 # ---------- Registrar resultados desde Muestras ----------
 
 p = muestra_con_analisis("A012")
-assert len(p.registrar_resultado("A012",200)) == 1
+assert lanza(ErrorEstado, p.registrar_resultado, "A012", 200)
 assert p.analisis[0].resultado is None
 print("Muestra (registrar resultado en muestra enviada): pruebas pasaron")
 p.avanzar_estado()
-assert len(p.registrar_resultado("A012",200)) == 0
+p.registrar_resultado("A012", 200)
 assert p.analisis[0].resultado == 200
 print("Muestra (registrar resultado): pruebas pasaron")
 
-assert len(p.registrar_resultado("A013", 100)) == 1
+assert lanza(ErrorNoEncontrado, p.registrar_resultado, "A013", 100)
 print("Muestra (registrar resultado en analisis que no esta en la muestra): pruebas pasaron")
-assert len(p.registrar_resultado("A012", -10)) == 1
+assert lanza(ErrorValor, p.registrar_resultado, "A012", -10)
 assert p.analisis[0].resultado == 200
 print("Muestra (registrar valor negativo): pruebas pasaron")
 
-assert len(p.registrar_resultado("A012",10)) == 0
+p.registrar_resultado("A012",10)
 assert p.analisis[0].resultado == 10
 print("Muestra (modificar resultado): pruebas pasaron")
 
@@ -142,7 +150,7 @@ liberada.avanzar_estado()                                  # confirmada
 liberada.registrar_resultado("A012", 10)
 liberada.avanzar_estado()                                  # liberada
 assert liberada.estado == "liberada"
-assert len(liberada.registrar_resultado("A012", 99)) == 1  # resultados bloqueados
+assert lanza(ErrorEstado, liberada.registrar_resultado, "A012", 99)# resultados bloqueados
 assert liberada.analisis[0].resultado == 10                # conserva el anterior
 
 cancelada = muestra_con_analisis("A012")
@@ -150,7 +158,7 @@ cancelada.avanzar_estado()                                 # confirmada
 cancelada.registrar_resultado("A012", 20)
 cancelada.cancelar()
 assert cancelada.estado == "cancelada"
-assert len(cancelada.registrar_resultado("A012", 50)) == 1
+assert lanza(ErrorEstado, cancelada.registrar_resultado, "A012", 50)
 assert cancelada.analisis[0].resultado == 20
 print("Muestra (registrar en liberada y cancelada): pruebas pasaron")
 
