@@ -93,6 +93,7 @@ Personal del equipo de microbiología encargado de registrar las muestras que so
 | `sample_data.py` | Muestras de ejemplo para pruebas. |
 | `test_registro.py` | Pruebas automáticas de las reglas del laboratorio. |
 | `test_models.py` | Pruebas automáticas de las clases `Analisis` y `Muestra`. |
+| `exceptions.py` | Tipos de error propios del laboratorio, que lanzan las clases cuando se intenta romper una regla. |
 
 Las reglas del laboratorio no dependen de la interacción ni de la presentación,
 por lo que podrían reutilizarse con otra interfaz, por ejemplo una web.
