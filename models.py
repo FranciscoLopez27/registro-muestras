@@ -1,5 +1,6 @@
 from datetime import date
 from constants import (ESTADOS_POSIBLES, ESTADOS_CANCELABLES)
+from exceptions import (ErrorEstado, ErrorValor, ErrorNoEncontrado, ErrorDuplicado)
 
 class Analisis:
     """Un análisis solicitado para una muestra, con una copia de los datos
@@ -44,16 +45,13 @@ class Analisis:
         que verifica que la muestra esté confirmada antes de llamar a este
         método. Por eso no debe llamarse directamente desde fuera de models.py.
 
-        Devuelve una lista de errores, vacía si el resultado se registró.
-        Si hay errores, el resultado anterior se conserva.
+        Lanza ErrorValor si el valor es negativo; en ese caso, el resultado
+        anterior se conserva.
         """
-        lista_errores = []
         if valor < 0:
-            lista_errores.append("El resultado tiene que ser un valor mayor o igual a 0")
-        if len(lista_errores) != 0:
-            return lista_errores
+            raise ErrorValor("El resultado tiene que ser un valor mayor o igual a 0")
         self._resultado = valor
-        return lista_errores
+        
 
 class Muestra:
     """Una muestra ingresada al laboratorio, con sus análisis y su estado.
@@ -91,19 +89,18 @@ class Muestra:
     def agregar_analisis(self, analisis):
         """Agrega un análisis a la muestra.
 
-        Devuelve una lista de errores, vacía si se agregó.
-        No se permiten dos análisis con el mismo código.
-        No se puede agregar un análisis nuevo si no esta en estado enviada.
+        Solo es posible mientras la muestra está enviada. Lanza:
+        - ErrorEstado: si la muestra no está en estado enviada.
+        - ErrorDuplicado: si la muestra ya tiene un análisis con ese código.
+
+        Si se lanza un error, el análisis no se agrega.
         """
-        lista_errores = []
         if self._estado != "enviada":
-            lista_errores.append(f"La muestra esta en estado {self._estado}, solo en estado enviada se puede agregar analisis")
-            return lista_errores
+            raise ErrorEstado(f"La muestra esta en estado {self._estado}, solo en estado enviada se puede agregar analisis")
         if any(analisis.codigo == analisis_registrado.codigo for analisis_registrado in self._analisis):
-            lista_errores.append("No pueden haber analisis repetidos para una muestra")
-            return lista_errores
+            raise ErrorDuplicado("No pueden haber analisis repetidos para una muestra")
         self._analisis.append(analisis)
-        return lista_errores
+        
 
     def _siguiente_estado(self):
         """Uso interno: el estado que sigue al actual en el flujo del
@@ -123,56 +120,51 @@ class Muestra:
     def avanzar_estado(self):
         """Avanza la muestra al siguiente estado: enviada, confirmada, liberada.
 
-        Devuelve una lista de errores, vacía si el estado cambió.
-        No avanza si la muestra no tiene análisis, si ya está en el último
-        estado o cancelada, ni se libera si hay resultados pendientes.
+        Lanza ErrorEstado si:
+        - la muestra ya está liberada o cancelada, por lo que no hay un estado siguiente;
+        - la muestra no tiene análisis;
+        - se intenta liberar con resultados pendientes.
+
+        Si se lanza el error, el estado no cambia.
         """
-        lista_errores = []
         estado_actual = self._estado
         nuevo_estado = self._siguiente_estado()
         if nuevo_estado is None:
-            lista_errores.append(f"El estado actual de la muestra se encuentra {estado_actual}, por lo que no se puede modificar")
-            return lista_errores
+            raise ErrorEstado(f"El estado actual de la muestra se encuentra {estado_actual}, por lo que no se puede modificar")
         if len(self._analisis) == 0:
-            lista_errores.append(f"La actual muestra no tiene ningun analisis asociado por lo que no se puede modificar su estado de {self._estado}")
-            return lista_errores
+            raise ErrorEstado(f"La actual muestra no tiene ningun analisis asociado por lo que no se puede modificar su estado de {self._estado}")
         if nuevo_estado == "liberada" and self.tiene_resultados_pendientes():
-            lista_errores.append("No todos los analisis tienen resultado, por lo que no puede ser liberada")
-        if len(lista_errores) == 0:
-            self._estado = nuevo_estado
-        return lista_errores
+            raise ErrorEstado("No todos los analisis tienen resultado, por lo que no puede ser liberada")
+        self._estado = nuevo_estado
 
     def cancelar(self):
         """Cancela la muestra, solo si está enviada o confirmada.
 
-        Devuelve una lista de errores, vacía si se canceló.
-        La cancelación no se puede deshacer.
+        Lanza ErrorEstado si la muestra está liberada o ya cancelada; en ese
+        caso, el estado no cambia. La cancelación no se puede deshacer.
         """
-        lista_errores = []
         if self._estado not in ESTADOS_CANCELABLES:
-            lista_errores.append(f"La muestra no puede ser cancelada ya que se encuentra en estado: {self._estado}")
-        if len(lista_errores) == 0:
-            self._estado = "cancelada"
-        return lista_errores
+            raise ErrorEstado(f"La muestra no puede ser cancelada ya que se encuentra en estado: {self._estado}")
+        self._estado = "cancelada"
+        
 
     def registrar_resultado(self, codigo_analisis, resultado):
         """Registra o corrige el resultado de uno de los análisis de la muestra.
 
-        Solo es posible si la muestra está confirmada. Devuelve una lista de
-        errores, vacía si se registró, incluidos los errores del propio
-        análisis, como un valor negativo.
+        Solo es posible mientras la muestra está confirmada. Lanza:
+        - ErrorEstado: si la muestra no está confirmada.
+        - ErrorNoEncontrado: si la muestra no tiene un análisis con ese código.
+        - ErrorValor: si el resultado no es válido (por ejemplo, negativo).
+        Este error lo lanza el propio análisis y llega sin cambios.
+
+        Si se lanza cualquiera de estos errores, ningún resultado se modifica.
         """
-        lista_errores = []
         if self._estado != "confirmada":
-            lista_errores.append("La muestra debe estar en estado confirmada para asociarle resultados")
-            return lista_errores
+            raise ErrorEstado("La muestra debe estar en estado confirmada para asociarle resultados")
         analisis_buscado = next((analisis for analisis in self._analisis if codigo_analisis == analisis.codigo), None)
         if analisis_buscado is None:
-            lista_errores.append(f"La muestra ingresada no tiene el analisis {codigo_analisis} registrado")
-        if len(lista_errores) != 0:
-            return lista_errores
-        lista_errores.extend(analisis_buscado._registrar_resultado(resultado))
-        return lista_errores
+            raise ErrorNoEncontrado(f"La muestra ingresada no tiene el analisis {codigo_analisis} registrado")
+        analisis_buscado._registrar_resultado(resultado)
         
 
 

@@ -55,14 +55,33 @@ De cada muestra se despliega toda su información, incluidos los análisis que e
 El sistema usa dos formas de informar errores, según el tipo de situación:
 
 - **Lista de errores, para validar los datos ingresados por el usuario** (`validar_muestra`). Se revisan todos los campos (cliente, descripción, análisis, unidades y límites) y se devuelven todos los problemas encontrados juntos, para que el usuario pueda corregirlos de una sola vez.
-- **Excepciones, para las reglas de las clases `Muestra` y `Analisis`** (agregar análisis, avanzar o cancelar el estado, registrar resultados). Cada una de estas operaciones no puede continuar cuando encuentra un problema, por lo que, en la práctica, solo puede informar un error a la vez. Con una excepción, además, el error no puede ignorarse por olvido: quien llama a la operación debe atenderlo, o el programa se detiene y lo informa.
+- **Excepciones, para las reglas de las clases `Muestra` y `Analisis`.** Cada una de estas operaciones no puede continuar cuando encuentra un problema, por lo que, en la práctica, solo puede informar un error a la vez. Con una excepción, además, el error no puede ignorarse por olvido: quien llama a la operación debe atenderlo, o el programa se detiene y lo informa.
 
-Las excepciones propias del laboratorio se organizan en una jerarquía:
-- `ErrorLaboratorio`: error general de las reglas del laboratorio.
-  - `ErrorEstado`: la operación no está permitida en el estado actual de la muestra (por ejemplo, registrar un resultado en una muestra liberada).
-  - `ErrorValor`: un dato no cumple las reglas (por ejemplo, un resultado negativo o un análisis repetido).
+### Jerarquía de errores
+- `ErrorLaboratorio`: error general de las reglas del laboratorio. Se usa para atender todos los errores juntos, no para lanzarlos.
+  - `ErrorEstado`: la operación no está permitida en la situación actual de la muestra.
+  - `ErrorValor`: un dato no cumple las reglas.
+  - `ErrorNoEncontrado`: se buscó algo que no existe.
+  - `ErrorDuplicado`: se intentó agregar algo que ya existe.
 
-Las clases lanzan estas excepciones donde se protege cada regla, y los controladores del menú las atienden para mostrar un mensaje al usuario. Distinguir los tipos permite que el controlador reaccione de forma distinta según el problema; cuando no necesita distinguirlos, puede atenderlos todos juntos como `ErrorLaboratorio`.
+### Errores de cada operación
+| Operación | Error | Caso |
+|---|---|---|
+| `agregar_analisis` | `ErrorEstado` | La muestra no está enviada |
+| | `ErrorDuplicado` | Ya existe un análisis con ese código |
+| `avanzar_estado` | `ErrorEstado` | Ya está liberada o cancelada, no tiene análisis, o se intenta liberar con resultados pendientes |
+| `cancelar` | `ErrorEstado` | La muestra está liberada o ya cancelada |
+| `registrar_resultado` | `ErrorEstado` | La muestra no está confirmada |
+| | `ErrorNoEncontrado` | La muestra no tiene un análisis con ese código |
+| | `ErrorValor` | El resultado es negativo (lo lanza el propio análisis) |
+
+En todos los casos, si se lanza un error, la muestra no se modifica.
+
+### Dónde se atienden los errores
+Los errores se lanzan donde se protege cada regla, en las clases, y se atienden donde hay una buena respuesta para ellos:
+- **Los controladores del menú** los atienden y muestran al usuario qué pasó y, cuando corresponde, qué puede hacer para resolverlo.
+- **`crear_muestra_ejemplo`** los atiende mediante la función `intentar`, que acumula sus mensajes en un aviso, para detectar recetas de ejemplo que no cumplen las reglas.
+- **`agregar_muestra` no atiende los errores de `agregar_analisis`, a propósito.** Como `validar_muestra` ya revisó los datos, estos errores no deberían ocurrir; si ocurrieran, indicarían un error del programa, y es preferible que se detenga y avise a que registre una muestra incompleta.
 
 ## Pseudocódigo
 

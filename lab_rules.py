@@ -64,6 +64,9 @@ def agregar_muestra(lista_muestras, datos_muestra):
 
     Devuelve una tupla (id, errores): el id de la muestra nueva y una lista
     vacía si se registró, o (None, errores) si los datos no son válidos.
+
+    Los errores de agregar_analisis no se atrapan: como validar_muestra ya
+    revisó los datos, si ocurrieran indicarían un error del programa.
     """
     lista_errores = validar_muestra(datos_muestra)
     if not lista_errores:
@@ -72,7 +75,7 @@ def agregar_muestra(lista_muestras, datos_muestra):
         for analisis in datos_muestra["analisis"]:
             nuevo_analisis = Analisis(analisis["codigo"], analisis["nombre"], analisis["norma"],
                                     analisis["unidad"], analisis["limite"])
-            lista_errores.extend(nueva_muestra.agregar_analisis(nuevo_analisis))
+            nueva_muestra.agregar_analisis(nuevo_analisis)
         lista_muestras.append(nueva_muestra)
         return(nueva_muestra.id_muestra, lista_errores)
     return(None, lista_errores)

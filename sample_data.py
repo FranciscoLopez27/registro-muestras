@@ -1,7 +1,22 @@
 from models import Analisis, Muestra
 from constants import CATALOGO_ANALISIS
+from exceptions import ErrorLaboratorio
 
 ESTADOS_QUE_PASAN_POR_CONFIRMADA = ("confirmada", "liberada", "cancelada")
+
+def intentar(errores, funcion, *argumentos):
+    """Llama a funcion(*argumentos) y, si lanza un error del laboratorio,
+    agrega su mensaje a la lista errores en vez de detener el programa.
+
+    errores: lista donde se acumulan los mensajes; se modifica directamente.
+    Solo atrapa errores de tipo ErrorLaboratorio y sus derivados: cualquier
+    otro error, como un KeyError por un código inexistente, se deja pasar,
+    porque indica un problema en la receta y no en las reglas.
+    """
+    try:
+        funcion(*argumentos)
+    except ErrorLaboratorio as error:
+        errores.append(str(error))
 
 
 def crear_muestra_ejemplo(id_muestra, cliente, descripcion, fecha_ingreso, lista_analisis, estado_buscado):
@@ -30,17 +45,19 @@ def crear_muestra_ejemplo(id_muestra, cliente, descripcion, fecha_ingreso, lista
         datos = CATALOGO_ANALISIS[codigo]
         nombre = datos["nombre"]
         norma = datos["norma"]
-        errores.extend(muestra.agregar_analisis(Analisis(codigo, nombre, norma, unidad, limite)))
+        intentar(errores, muestra.agregar_analisis, Analisis(codigo, nombre, norma, unidad, limite))
 
     if estado_buscado in ESTADOS_QUE_PASAN_POR_CONFIRMADA:
-        errores.extend(muestra.avanzar_estado())
+        intentar(errores, muestra.avanzar_estado)
+        
         for codigo, _, _, resultado in lista_analisis:
             if resultado is not None:
-                errores.extend(muestra.registrar_resultado(codigo, resultado))
+                intentar(errores, muestra.registrar_resultado, codigo, resultado)
+
     if estado_buscado == "cancelada":
-        errores.extend(muestra.cancelar())
+        intentar(errores, muestra.cancelar)
     elif estado_buscado == "liberada":
-        errores.extend(muestra.avanzar_estado())
+        intentar(errores, muestra.avanzar_estado)
 
     if errores:
         print(f"Aviso: la muestra de ejemplo {id_muestra} tuvo errores: {errores}")
