@@ -9,3 +9,6 @@ class ErrorValor(ErrorLaboratorio):
 
 class ErrorNoEncontrado(ErrorLaboratorio):
     """Un dato no se encontro dentro del sistema de almacenamiento que se esta buscando"""
+
+class ErrorDuplicado(ErrorLaboratorio):
+    """Un dato no puede estar duplicado para esta operación"""

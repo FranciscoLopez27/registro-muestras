@@ -2,6 +2,7 @@ from models import (Analisis, Muestra)
 from constants import (
     CATALOGO_CLIENTES, CATALOGO_ANALISIS, ESTADOS_EN_ORDEN
     )
+from exceptions import (ErrorEstado, ErrorDuplicado, ErrorValor, ErrorNoEncontrado)
 
 
 def generar_id(numero):
@@ -72,7 +73,7 @@ def agregar_muestra(lista_muestras, datos_muestra):
         for analisis in datos_muestra["analisis"]:
             nuevo_analisis = Analisis(analisis["codigo"], analisis["nombre"], analisis["norma"],
                                     analisis["unidad"], analisis["limite"])
-            lista_errores.extend(nueva_muestra.agregar_analisis(nuevo_analisis))
+            nueva_muestra.agregar_analisis(nuevo_analisis)
         lista_muestras.append(nueva_muestra)
         return(nueva_muestra.id_muestra, lista_errores)
     return(None, lista_errores)

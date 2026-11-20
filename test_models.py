@@ -1,6 +1,6 @@
 from models import (Analisis, Muestra)
 from datetime import date
-from exceptions import (ErrorLaboratorio,ErrorEstado,ErrorNoEncontrado,ErrorValor)
+from exceptions import (ErrorLaboratorio,ErrorEstado,ErrorNoEncontrado,ErrorValor,ErrorDuplicado)
 
 def lanza(tipo_error, funcion, *argumentos):
     """Devuelve True si llamar a funcion(*argumentos) lanza un error del tipo indicado."""
@@ -69,57 +69,56 @@ print("Muestra (creación): pruebas pasaron")
 
 # ---------- Análisis ----------
 m = Muestra("M-0001", "0042", "Leche entera lote 123")
-assert m.agregar_analisis(nuevo_analisis("A012")) == []
+m.agregar_analisis(nuevo_analisis("A012"))
 assert len(m.analisis) == 1
-assert len(m.agregar_analisis(nuevo_analisis("A012"))) == 1   # código repetido
+assert lanza(ErrorDuplicado, m.agregar_analisis, nuevo_analisis("A012"))
 assert len(m.analisis) == 1                                    # no se agregó
-assert m.agregar_analisis(nuevo_analisis("A013")) == []
+m.agregar_analisis(nuevo_analisis("A013"))
 assert len(m.analisis) == 2
 assert isinstance(m.analisis, tuple)
 print("Muestra (análisis): pruebas pasaron")
 
 # ---------- Avanzar estado ----------
 sin_analisis = Muestra("M-0003", "0047", "Lechuga escarola")
-assert len(sin_analisis.avanzar_estado()) == 1
+assert lanza(ErrorEstado, sin_analisis.avanzar_estado)
 assert sin_analisis.estado == "enviada"
 
 m = muestra_con_analisis("A012", "A013")
-assert m.avanzar_estado() == []
+m.avanzar_estado()
 assert m.estado == "confirmada"
 
 m.registrar_resultado("A012",50)                    # un resultado pendiente
 assert m.tiene_resultados_pendientes() is True
-assert len(m.avanzar_estado()) == 1
+assert lanza(ErrorEstado,m.avanzar_estado)
 assert m.estado == "confirmada"
 
 m.registrar_resultado("A013",30)                    # todos con resultado
 assert m.tiene_resultados_pendientes() is False
-assert m.avanzar_estado() == []
+m.avanzar_estado()
 assert m.estado == "liberada"
-
-assert len(m.avanzar_estado()) == 1                      # ya está liberada
+assert lanza(ErrorEstado, m.avanzar_estado)                   # ya está liberada
 assert m.estado == "liberada"
 print("Muestra (avanzar estado): pruebas pasaron")
 
 # ---------- Cancelar ----------
 enviada = muestra_con_analisis("A012")
-assert enviada.cancelar() == []
+enviada.cancelar()
 assert enviada.estado == "cancelada"
 
 confirmada = muestra_con_analisis("A012")
 confirmada.avanzar_estado()
-assert confirmada.cancelar() == []
+confirmada.cancelar()
 assert confirmada.estado == "cancelada"
 
 liberada = muestra_con_analisis("A012")
 liberada.avanzar_estado()
 liberada.registrar_resultado("A012",10)
 liberada.avanzar_estado()
-assert len(liberada.cancelar()) == 1
+assert lanza(ErrorEstado, liberada.cancelar)
 assert liberada.estado == "liberada"
 
-assert len(enviada.cancelar()) == 1                      # ya está cancelada
-assert len(enviada.avanzar_estado()) == 1                # y no puede avanzar
+assert lanza(ErrorEstado, enviada.cancelar)                 # ya está cancelada
+assert lanza(ErrorEstado, enviada.avanzar_estado)           # y no puede avanzar
 assert enviada.estado == "cancelada"
 print("Muestra (cancelar): pruebas pasaron")
 
@@ -175,6 +174,6 @@ print("Muestra (modificar resultado y actualizacion de especificación): pruebas
 confirmada = muestra_con_analisis("A012")
 confirmada.avanzar_estado()
 assert confirmada.estado == "confirmada"
-assert len(confirmada.agregar_analisis(nuevo_analisis("A013"))) == 1
+assert lanza(ErrorEstado, confirmada.agregar_analisis, nuevo_analisis("A013"))
 assert len(confirmada.analisis) == 1                       # no se agregó
 print("Muestra (agregar en confirmada): pruebas pasaron")

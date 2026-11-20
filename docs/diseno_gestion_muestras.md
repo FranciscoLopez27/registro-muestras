@@ -59,8 +59,9 @@ El sistema usa dos formas de informar errores, según el tipo de situación:
 
 Las excepciones propias del laboratorio se organizan en una jerarquía:
 - `ErrorLaboratorio`: error general de las reglas del laboratorio.
-  - `ErrorEstado`: la operación no está permitida en el estado actual de la muestra (por ejemplo, registrar un resultado en una muestra liberada).
-  - `ErrorValor`: un dato no cumple las reglas (por ejemplo, un resultado negativo o un análisis repetido).
+- `ErrorEstado`: la operación no está permitida en el estado actual de la muestra (por ejemplo, registrar un resultado en una muestra liberada).
+- `ErrorValor`: un dato no cumple las reglas (por ejemplo, un resultado negativo o un análisis repetido).
+- `ErrorDuplicado`: La operación que se quiere realizar no admite datos duplicados, por lo que el dato que se intenta ingresar ya esta en el sistema.
 
 Las clases lanzan estas excepciones donde se protege cada regla, y los controladores del menú las atienden para mostrar un mensaje al usuario. Distinguir los tipos permite que el controlador reaccione de forma distinta según el problema; cuando no necesita distinguirlos, puede atenderlos todos juntos como `ErrorLaboratorio`.
 

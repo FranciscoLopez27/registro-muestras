@@ -43,18 +43,20 @@ def opcion_cambiar_estado(lista_muestras):
     "3. Regresar.\n"
     "Digite la opcion que desea realizar: ").strip()
     if opcion_estado == "1":
-        lista_errores = muestra_encontrada.avanzar_estado()
-        if len(lista_errores) != 0:
-            mostrar_errores("No se ha podido modificar el estado", lista_errores)
+        try:
+            muestra_encontrada.avanzar_estado()
+        except ErrorEstado as error:
+            print(f"\nNo se logro modificar el estado de la muestra: {error}")
         else:
             print(f"El estado ha sido cambiado a {muestra_encontrada.estado}")
 
     elif opcion_estado == "2":
         print(f"¿Está seguro de que desea cancelar la muestra {muestra_encontrada.id_muestra}?")
         if pedir_si_no("Esta acción no se puede deshacer y debe estar autorizada por jefatura."):
-            lista_errores = muestra_encontrada.cancelar()
-            if len(lista_errores) != 0:
-                mostrar_errores("No se ha podido modificar el estado", lista_errores)
+            try:
+                muestra_encontrada.cancelar()
+            except ErrorEstado as error:
+                print(f"\nNo se logro cancelar la muestra: {error}")
             else:
                 print("La muestra ha sido cancelada correctamente")
         else:
@@ -103,7 +105,6 @@ def opcion_registrar_resultado(lista_muestras):
             print(f"El resultado quedo dentro de especificación")
     pausar()
         
-
 def opcion_listar_fuera_de_norma(lista_muestras):
     muestras_fuera_especificacion = muestras_fuera_norma(lista_muestras)
     if len(muestras_fuera_especificacion) == 0:
