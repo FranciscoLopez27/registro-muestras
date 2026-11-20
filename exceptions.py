@@ -8,7 +8,7 @@ class ErrorValor(ErrorLaboratorio):
     """Un dato no cumple las reglas del laboratorio."""
 
 class ErrorNoEncontrado(ErrorLaboratorio):
-    """Un dato no se encontro dentro del sistema de almacenamiento que se esta buscando"""
+    """Se buscó un dato que no existe, por ejemplo un análisis que no está en la muestra."""
 
 class ErrorDuplicado(ErrorLaboratorio):
     """Un dato no puede estar duplicado para esta operación"""

@@ -1,6 +1,6 @@
 from datetime import date
 from constants import (ESTADOS_POSIBLES, ESTADOS_CANCELABLES)
-from exceptions import (ErrorEstado, ErrorLaboratorio, ErrorValor, ErrorNoEncontrado, ErrorDuplicado)
+from exceptions import (ErrorEstado, ErrorValor, ErrorNoEncontrado, ErrorDuplicado)
 
 class Analisis:
     """Un análisis solicitado para una muestra, con una copia de los datos

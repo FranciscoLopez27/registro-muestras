@@ -2,7 +2,6 @@ from models import (Analisis, Muestra)
 from constants import (
     CATALOGO_CLIENTES, CATALOGO_ANALISIS, ESTADOS_EN_ORDEN
     )
-from exceptions import (ErrorEstado, ErrorDuplicado, ErrorValor, ErrorNoEncontrado)
 
 
 def generar_id(numero):
@@ -65,6 +64,9 @@ def agregar_muestra(lista_muestras, datos_muestra):
 
     Devuelve una tupla (id, errores): el id de la muestra nueva y una lista
     vacía si se registró, o (None, errores) si los datos no son válidos.
+
+    Los errores de agregar_analisis no se atrapan: como validar_muestra ya
+    revisó los datos, si ocurrieran indicarían un error del programa.
     """
     lista_errores = validar_muestra(datos_muestra)
     if not lista_errores:

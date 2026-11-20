@@ -9,7 +9,7 @@ from inputs import(
     elegir_codigo, pedir_entero, pedir_si_no
 )
 
-from exceptions import(ErrorNoEncontrado, ErrorEstado, ErrorValor, ErrorLaboratorio)
+from exceptions import(ErrorNoEncontrado, ErrorEstado, ErrorValor)
 
 def opcion_agregar_muestra(lista_muestras):
     id_nuevo, errores = agregar_muestra(lista_muestras,pedir_datos_muestra())
