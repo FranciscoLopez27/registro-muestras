@@ -51,6 +51,17 @@ class Analisis:
         if valor < 0:
             raise ErrorValor("El resultado tiene que ser un valor mayor o igual a 0")
         self._resultado = valor
+
+    def a_diccionario(self):
+        """Devuelve los datos del análisis como diccionario, para guardarlos."""
+        return {
+            "codigo": self.codigo,
+            "nombre": self.nombre,
+            "norma": self.norma,
+            "unidad": self.unidad,
+            "limite": self.limite,
+            "resultado": self._resultado
+        }
         
 
 class Muestra:
@@ -166,5 +177,13 @@ class Muestra:
             raise ErrorNoEncontrado(f"La muestra ingresada no tiene el analisis {codigo_analisis} registrado")
         analisis_buscado._registrar_resultado(resultado)
         
-
-
+    def a_diccionario(self):
+        """Devuelve los datos de la muestra como diccionario, para guardarlos."""
+        return {
+            "id_muestra": self.id_muestra,
+            "cliente": self.cliente,
+            "descripcion": self.descripcion,
+            "fecha_ingreso": self.fecha_ingreso,
+            "estado": self._estado,
+            "analisis": [analisis.a_diccionario() for analisis in self._analisis]
+        }
