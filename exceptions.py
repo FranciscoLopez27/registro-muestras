@@ -12,3 +12,6 @@ class ErrorNoEncontrado(ErrorLaboratorio):
 
 class ErrorDuplicado(ErrorLaboratorio):
     """Un dato no puede estar duplicado para esta operación"""
+
+class ErrorIntegridad(ErrorLaboratorio):
+    """Un dato que se estan cargando de un archivo no pasa las validaciones"""

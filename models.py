@@ -1,6 +1,6 @@
 from datetime import date
-from constants import (ESTADOS_POSIBLES, ESTADOS_CANCELABLES)
-from exceptions import (ErrorEstado, ErrorValor, ErrorNoEncontrado, ErrorDuplicado)
+from constants import (ESTADOS_POSIBLES, ESTADOS_CANCELABLES, ESTADOS_EN_ORDEN)
+from exceptions import (ErrorEstado, ErrorValor, ErrorNoEncontrado, ErrorDuplicado, ErrorIntegridad)
 
 class Analisis:
     """Un análisis solicitado para una muestra, con una copia de los datos
@@ -62,6 +62,28 @@ class Analisis:
             "limite": self.limite,
             "resultado": self._resultado
         }
+
+    @classmethod
+    def desde_diccionario(cls, datos):
+        """Restaura un análisis a partir de un diccionario guardado.
+
+        Se usa al cargar los datos: asigna el resultado directamente, sin
+        repetir el registro. Lanza ErrorIntegridad si el límite o el resultado
+        no son válidos, y KeyError si falta alguna clave.
+        """
+        limite = datos["limite"]
+        resultado = datos["resultado"]
+        if not isinstance(limite, int) or limite < 0:
+            raise ErrorIntegridad("El límite tiene que ser un número entero igual o mayor a 0")
+        if resultado is not None:
+            if not isinstance(resultado, int) or resultado < 0:
+                raise ErrorIntegridad("El resultado tiene que ser None o un número entero igual o mayor a 0")
+
+        analisis_cargado = cls(datos["codigo"], datos["nombre"], datos["norma"],
+                            datos["unidad"], limite)
+        analisis_cargado._resultado = resultado
+        return analisis_cargado
+
         
 
 class Muestra:
@@ -85,6 +107,31 @@ class Muestra:
         self.fecha_ingreso = fecha_ingreso
         self._estado = "enviada"
         self._analisis = []
+
+    @classmethod
+    def desde_diccionario(cls, datos):
+        """Restaura una muestra a partir de un diccionario guardado.
+
+        Se usa al cargar los datos: asigna el estado y los análisis
+        directamente, sin repetir el flujo del laboratorio. Solo revisa la
+        integridad de los datos, no las reglas de negocio.
+
+        Lanza ErrorIntegridad si el estado no existe, si hay análisis con
+        códigos repetidos, o si algún análisis tiene datos inválidos.
+        Lanza KeyError si falta alguna clave.
+        """
+        if datos["estado"] not in ESTADOS_EN_ORDEN:
+            raise ErrorIntegridad("El estado de la muestra no es valido ya que no se encuentra en los estados posibles.")
+        lista_codigos = [analisis["codigo"] for analisis in datos["analisis"]]
+        if len(lista_codigos) != len(set(lista_codigos)):
+            raise ErrorIntegridad("La muestra que intenta cargar tiene dos análisis iguales, lo que no es valido.")
+        muestra_cargada = cls(datos["id_muestra"], datos["cliente"], datos["descripcion"], datos["fecha_ingreso"])
+        muestra_cargada._estado = datos["estado"]
+        
+        for datos_analisis in datos["analisis"]:
+            analisis = Analisis.desde_diccionario(datos_analisis)
+            muestra_cargada._analisis.append(analisis)
+        return muestra_cargada
 
     @property
     def estado(self):
@@ -187,3 +234,5 @@ class Muestra:
             "estado": self._estado,
             "analisis": [analisis.a_diccionario() for analisis in self._analisis]
         }
+
+    
