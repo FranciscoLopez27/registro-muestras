@@ -1,4 +1,4 @@
-from models import (Analisis, Muestra)
+from models import (Analisis, Muestra, numero_de_id)
 from constants import (
     CATALOGO_CLIENTES, CATALOGO_ANALISIS, ESTADOS_EN_ORDEN
     )
@@ -51,7 +51,7 @@ def validar_muestra(datos_muestra):
 
     return lista_errores
 
-def agregar_muestra(lista_muestras, datos_muestra):
+def agregar_muestra(lista_muestras, datos_muestra, cuarentena=()):
     """Registra una muestra nueva a partir de los datos ingresados por el usuario.
 
     datos_muestra: diccionario con el cliente, la descripción y la lista de
@@ -70,7 +70,7 @@ def agregar_muestra(lista_muestras, datos_muestra):
     """
     lista_errores = validar_muestra(datos_muestra)
     if not lista_errores:
-        id_muestra = generar_id(len(lista_muestras)+1)
+        id_muestra = generar_id(siguiente_numero_de_id(lista_muestras, cuarentena))
         nueva_muestra = Muestra(id_muestra, datos_muestra["cliente"], datos_muestra["descripcion"])
         for analisis in datos_muestra["analisis"]:
             nuevo_analisis = Analisis(analisis["codigo"], analisis["nombre"], analisis["norma"],
@@ -113,3 +113,13 @@ def agrupar_por_estado(lista_muestras):
     ordenado = {estado: por_estado[estado] for estado in ESTADOS_EN_ORDEN if estado in por_estado}
     return ordenado
 
+def siguiente_numero_de_id(lista_muestras, cuarentena):
+    lista_de_numeros = []
+    for muestra in lista_muestras:
+        lista_de_numeros.append(numero_de_id(muestra.id_muestra))
+    for registro in cuarentena:
+        if isinstance(registro, dict):
+            identificador_registro = numero_de_id(registro.get("id_muestra"))
+            if identificador_registro is not None:
+                lista_de_numeros.append(identificador_registro)
+    return max(lista_de_numeros, default=0) + 1

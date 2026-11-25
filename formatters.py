@@ -3,7 +3,7 @@ TEXTOS_EN_BASE_A_RESULTADOS = {None: "|| Especificación: pendiente",
                             False: "|| Especificación: dentro"
                             }
 
-from constants import CATALOGO_CLIENTES
+from constants import CATALOGO_CLIENTES, RUTA_DATOS
 
 def listar_muestras(lista_muestras):
     if not lista_muestras:
@@ -42,3 +42,20 @@ def mostrar_menu():
 
 def pausar():
     input("Presione enter para continuar...")
+
+def mostrar_alerta_cuarentena(cuarentena):
+    if not cuarentena:
+        return
+    largo_registro_cuarentena = len(cuarentena)
+    if largo_registro_cuarentena == 1:
+        print(f"!!! ATENCIÓN: {largo_registro_cuarentena} registro en cuarentena !!!")
+    else:
+        print(f"!!! ATENCIÓN: {largo_registro_cuarentena} registros en cuarentena !!!")
+    print("Los siguientes registros del archivo de datos no pasaron la validación")
+    print("y no se cargaron. Se conservan sin cambios hasta que sean revisados:")
+    for registro in cuarentena:
+        if isinstance(registro, dict):
+            print(f"- {registro.get("id_muestra", "sin id")}")
+        else:
+            print("- Registro sin formato válido")
+    print(f"Revise y corrija el archivo {RUTA_DATOS}")

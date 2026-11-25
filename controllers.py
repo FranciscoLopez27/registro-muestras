@@ -11,8 +11,8 @@ from inputs import(
 
 from exceptions import(ErrorNoEncontrado, ErrorEstado, ErrorValor)
 
-def opcion_agregar_muestra(lista_muestras):
-    id_nuevo, errores = agregar_muestra(lista_muestras,pedir_datos_muestra())
+def opcion_agregar_muestra(lista_muestras, cuarentena):
+    id_nuevo, errores = agregar_muestra(lista_muestras, pedir_datos_muestra(), cuarentena)
     if errores:
         mostrar_errores("La muestra no ha podido ser creada", errores)
         
@@ -21,18 +21,18 @@ def opcion_agregar_muestra(lista_muestras):
         print(f"\nID de la muestra: {id_nuevo}")
     pausar()
 
-def opcion_listar_muestras(lista_muestras):
+def opcion_listar_muestras(lista_muestras, cuarentena):
     listar_muestras(lista_muestras)
     pausar()
 
-def opcion_buscar_muestra(lista_muestras):
+def opcion_buscar_muestra(lista_muestras, cuarentena):
     muestra_encontrada = pedir_muestra_existente(lista_muestras, "Digite el ID  de la muestra a buscar: \n")
     if muestra_encontrada is None:
         return
     listar_muestras([muestra_encontrada])
     pausar()
 
-def opcion_cambiar_estado(lista_muestras):
+def opcion_cambiar_estado(lista_muestras, cuarentena):
     muestra_encontrada = pedir_muestra_existente(lista_muestras, "Digite el ID de la muestra que se quiere modificar el estado: \n")
     if muestra_encontrada is None:
         return
@@ -69,7 +69,7 @@ def opcion_cambiar_estado(lista_muestras):
         print("Opcion ingresada no valida, volviendo al menu")
     pausar()
 
-def opcion_registrar_resultado(lista_muestras):
+def opcion_registrar_resultado(lista_muestras, cuarentena):
     muestra_encontrada = pedir_muestra_existente(lista_muestras, "Digite el ID de la muestra que quiere ingresar resultado: \n")
     if muestra_encontrada is None:
         return
@@ -105,7 +105,7 @@ def opcion_registrar_resultado(lista_muestras):
             print(f"El resultado quedo dentro de especificación")
     pausar()
         
-def opcion_listar_fuera_de_norma(lista_muestras):
+def opcion_listar_fuera_de_norma(lista_muestras, cuarentena):
     muestras_fuera_especificacion = muestras_fuera_norma(lista_muestras)
     if len(muestras_fuera_especificacion) == 0:
         print("No se tiene ninguna muestra fuera de especificación en la base de datos")

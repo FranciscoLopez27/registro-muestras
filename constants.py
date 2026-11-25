@@ -17,3 +17,7 @@ ESTADOS_POSIBLES = ("enviada","confirmada","liberada")
 ESTADOS_CANCELABLES = ("enviada", "confirmada")
 
 ESTADOS_EN_ORDEN = ESTADOS_POSIBLES + ("cancelada",)
+
+RUTA_DATOS = "muestras.json"
+
+OPCIONES_QUE_MODIFICAN = ("1", "4", "5")

@@ -2,6 +2,19 @@ from datetime import date
 from constants import (ESTADOS_POSIBLES, ESTADOS_CANCELABLES, ESTADOS_EN_ORDEN)
 from exceptions import (ErrorEstado, ErrorValor, ErrorNoEncontrado, ErrorDuplicado, ErrorIntegridad)
 
+
+def numero_de_id(id_texto):
+    if not isinstance(id_texto, str):
+        return None
+    if not id_texto.startswith("M-"):
+        return None
+    parte_numerica = id_texto[2:]
+    if len(parte_numerica) != 4:
+        return None
+    if parte_numerica.isdigit():
+        return int(parte_numerica)
+    return None
+
 class Analisis:
     """Un análisis solicitado para una muestra, con una copia de los datos
     vigentes del catálogo al momento del registro."""
@@ -119,12 +132,15 @@ class Muestra:
         Lanza ErrorIntegridad si el estado no existe, si hay análisis con
         códigos repetidos, o si algún análisis tiene datos inválidos.
         Lanza KeyError si falta alguna clave.
+        Si el id no tiene el formato M-0000 lanza ErrorIntegridad
         """
         if datos["estado"] not in ESTADOS_EN_ORDEN:
             raise ErrorIntegridad("El estado de la muestra no es valido ya que no se encuentra en los estados posibles.")
         lista_codigos = [analisis["codigo"] for analisis in datos["analisis"]]
         if len(lista_codigos) != len(set(lista_codigos)):
             raise ErrorIntegridad("La muestra que intenta cargar tiene dos análisis iguales, lo que no es valido.")
+        if numero_de_id(datos["id_muestra"]) is None:
+            raise ErrorIntegridad("El ID de identificación no tiene el formato correcto")
         muestra_cargada = cls(datos["id_muestra"], datos["cliente"], datos["descripcion"], datos["fecha_ingreso"])
         muestra_cargada._estado = datos["estado"]
         
